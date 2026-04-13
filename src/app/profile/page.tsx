@@ -18,6 +18,10 @@ export default function ProfilePage() {
     return "profile";
   });
   const [saving, setSaving] = useState(false);
+  const [returnModal, setReturnModal] = useState<any>(null); // { order, item }
+  const [returnForm, setReturnForm] = useState({ type: "return", reason: "", description: "" });
+  const [returnSubmitting, setReturnSubmitting] = useState(false);
+  const [returnRequests, setReturnRequests] = useState<any[]>([]);
   const [pwForm, setPwForm] = useState({ current: "", newPw: "", confirm: "" });
   const [showPw, setShowPw] = useState({ current: false, newPw: false, confirm: false });
   const [pwSaving, setPwSaving] = useState(false);
@@ -44,6 +48,8 @@ export default function ProfilePage() {
       const { data: o } = await supabase.from("orders").select("*, items:order_items(*)").eq("user_id", user.id).order("created_at", { ascending: false });
       setOrders(o || []);
       const { data: a } = await supabase.from("addresses").select("*").eq("user_id", user.id);
+      const { data: rr } = await supabase.from("return_requests").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+      setReturnRequests(rr || []);
       setAddresses(a || []);
     });
   }, []);
@@ -71,6 +77,27 @@ export default function ProfilePage() {
     if (error) { alert(error.message); return; }
     alert("Password updated successfully!");
     setPwForm({ current: "", newPw: "", confirm: "" });
+  };
+
+  const submitReturn = async () => {
+    if (!returnModal || !returnForm.reason) { alert("Please select a reason."); return; }
+    setReturnSubmitting(true);
+    const { error } = await supabase.from("return_requests").insert({
+      order_id: returnModal.order.id,
+      user_id: user!.id,
+      order_item_id: returnModal.item?.id || null,
+      product_name: returnModal.item?.product_name || "Order items",
+      type: returnForm.type,
+      reason: returnForm.reason,
+      description: returnForm.description,
+    });
+    setReturnSubmitting(false);
+    if (error) { alert("Error: " + error.message); return; }
+    const { data: rr } = await supabase.from("return_requests").select("*").eq("user_id", user!.id).order("created_at", { ascending: false });
+    setReturnRequests(rr || []);
+    setReturnModal(null);
+    setReturnForm({ type: "return", reason: "", description: "" });
+    alert("Return request submitted! Our team will review it within 24-48 hours.");
   };
 
   const saveAddress = async () => {
@@ -210,7 +237,18 @@ export default function ProfilePage() {
                         <button onClick={()=>setTrackingOrder(trackingOrder?.id===order.id?null:order)} style={{background:trackingOrder?.id===order.id?"#6B1A2A":"none",color:trackingOrder?.id===order.id?"white":"#6B635C",border:"1px solid #E4DAD0",borderRadius:"3px",padding:"6px 14px",fontSize:"12px",cursor:"pointer"}}>
   {trackingOrder?.id===order.id?"Hide Tracking":"Track Order"}
 </button>
-                        {order.status==="delivered"&&<button style={{background:"none",border:"1px solid #E4DAD0",borderRadius:"3px",padding:"6px 14px",fontSize:"12px",color:"#6B635C",cursor:"pointer"}}>Return / Exchange</button>}
+                        {order.status==="delivered"&&(()=>{
+  const existingRequest = returnRequests.find(r=>r.order_id===order.id);
+  if(existingRequest){
+    const statusColors: any = {requested:"#FEF3C7",approved:"#D1FAE5",rejected:"#FEE2E2",picked_up:"#DBEAFE",refunded:"#D1FAE5"};
+    const statusTextC: any = {requested:"#92400E",approved:"#065F46",rejected:"#991B1B",picked_up:"#1E40AF",refunded:"#065F46"};
+    return <span style={{background:statusColors[existingRequest.status],color:statusTextC[existingRequest.status],padding:"4px 12px",borderRadius:"3px",fontSize:"11px",fontWeight:500}}>
+      Return: {existingRequest.status.charAt(0).toUpperCase()+existingRequest.status.slice(1)}
+      {existingRequest.admin_note&&<span style={{marginLeft:"6px",fontSize:"10px"}}>· {existingRequest.admin_note}</span>}
+    </span>;
+  }
+  return <button onClick={()=>setReturnModal({order,item:order.items?.[0]})} style={{background:"none",border:"1px solid #E4DAD0",borderRadius:"3px",padding:"6px 14px",fontSize:"12px",color:"#6B635C",cursor:"pointer"}}>Return / Exchange</button>;
+})()}
                       </div>
                       {trackingOrder?.id===order.id&&(
                         <div style={{marginTop:"1rem",padding:"1rem",background:"#FAF8F3",borderRadius:"4px",border:"1px solid #EDE6DC"}}>
@@ -366,6 +404,62 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+      {/* Return Request Modal */}
+      {returnModal && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:9000,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}} onClick={()=>setReturnModal(null)}>
+          <div style={{background:"white",borderRadius:"8px",padding:"2rem",maxWidth:"500px",width:"100%",maxHeight:"85vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem"}}>
+              <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"22px",fontWeight:400,color:"#2C2420",margin:0}}>Return / Exchange Request</h2>
+              <button onClick={()=>setReturnModal(null)} style={{background:"none",border:"none",fontSize:"20px",cursor:"pointer",color:"#A09890"}}>✕</button>
+            </div>
+            <div style={{background:"#FAF8F3",border:"1px solid #EDE6DC",borderRadius:"4px",padding:"12px",marginBottom:"1.25rem",fontSize:"13px",color:"#2C2420"}}>
+              <div style={{fontWeight:500}}>Order #{returnModal.order.id.slice(0,8).toUpperCase()}</div>
+              <div style={{color:"#A09890",marginTop:"2px"}}>{returnModal.item?.product_name}</div>
+            </div>
+            <div style={{marginBottom:"1rem"}}>
+              <label style={{display:"block",fontSize:"10px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",marginBottom:"8px",fontWeight:500}}>Request Type</label>
+              <div style={{display:"flex",gap:"8px"}}>
+                {["return","exchange"].map(t=>(
+                  <button key={t} onClick={()=>setReturnForm({...returnForm,type:t})}
+                    style={{flex:1,padding:"10px",border:`1px solid ${returnForm.type===t?"#6B1A2A":"#E4DAD0"}`,borderRadius:"3px",background:returnForm.type===t?"#6B1A2A":"white",color:returnForm.type===t?"white":"#6B635C",fontSize:"13px",cursor:"pointer",fontWeight:500}}>
+                    {t==="return"?"↩ Return & Refund":"🔄 Exchange"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={{marginBottom:"1rem"}}>
+              <label style={{display:"block",fontSize:"10px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",marginBottom:"8px",fontWeight:500}}>Reason *</label>
+              <select value={returnForm.reason} onChange={e=>setReturnForm({...returnForm,reason:e.target.value})}
+                style={{width:"100%",padding:"10px 12px",fontSize:"13px",border:"1px solid #E4DAD0",borderRadius:"3px",background:"#FAF8F3",outline:"none"}}>
+                <option value="">Select a reason...</option>
+                <option value="wrong_size">Wrong size / doesn't fit</option>
+                <option value="defective">Defective or damaged</option>
+                <option value="not_as_described">Not as described</option>
+                <option value="wrong_item">Wrong item received</option>
+                <option value="quality_issue">Quality not as expected</option>
+                <option value="changed_mind">Changed my mind</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div style={{marginBottom:"1.5rem"}}>
+              <label style={{display:"block",fontSize:"10px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",marginBottom:"8px",fontWeight:500}}>Additional Details</label>
+              <textarea value={returnForm.description} onChange={e=>setReturnForm({...returnForm,description:e.target.value})}
+                placeholder="Please describe the issue in detail..."
+                style={{width:"100%",padding:"10px 12px",fontSize:"13px",border:"1px solid #E4DAD0",borderRadius:"3px",background:"#FAF8F3",outline:"none",minHeight:"80px",resize:"vertical",fontFamily:"'DM Sans',sans-serif",boxSizing:"border-box"}} />
+            </div>
+            <div style={{background:"#FEF3C7",border:"1px solid #F59E0B",borderRadius:"4px",padding:"10px 12px",marginBottom:"1.25rem",fontSize:"12px",color:"#92400E"}}>
+              ℹ️ Returns are accepted within 7 days of delivery. Our team will review your request within 24-48 hours.
+            </div>
+            <div style={{display:"flex",gap:"10px"}}>
+              <button onClick={submitReturn} disabled={returnSubmitting||!returnForm.reason}
+                style={{flex:1,background:"#6B1A2A",color:"white",border:"none",padding:"12px",fontSize:"12px",letterSpacing:"1px",textTransform:"uppercase",cursor:"pointer",borderRadius:"3px",opacity:(returnSubmitting||!returnForm.reason)?0.6:1}}>
+                {returnSubmitting?"Submitting...":"Submit Request"}
+              </button>
+              <button onClick={()=>setReturnModal(null)} style={{padding:"12px 20px",border:"1px solid #E4DAD0",background:"none",color:"#6B635C",fontSize:"12px",cursor:"pointer",borderRadius:"3px"}}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
       <Footer />
     </>
   );

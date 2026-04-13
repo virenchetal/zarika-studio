@@ -11,6 +11,7 @@ export default function AdminPage() {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [orderFilter, setOrderFilter] = useState({ status: "all", payment: "all", search: "" });
+  const [returns, setReturns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
@@ -33,6 +34,8 @@ export default function AdminPage() {
       const { data: pr } = await supabase.from("products").select("*, category:categories(name)").order("created_at", { ascending: false });
       setProducts(pr || []);
       const { data: msgs } = await supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
+      const { data: ret } = await supabase.from("return_requests").select("*, order:orders(id,total), profile:profiles!return_requests_user_id_fkey(full_name,email,phone)").order("created_at", { ascending: false });
+      setReturns(ret || []);
       setMessages(msgs || []);
       setLoading(false);
     }
@@ -52,6 +55,11 @@ export default function AdminPage() {
     if (status === "delivered" && order?.payment_method === "cod") updates.payment_status = "paid";
     await supabase.from("orders").update(updates).eq("id", id);
     setOrders(orders.map(o => o.id === id ? { ...o, ...updates } : o));
+  };
+
+  const updateReturnStatus = async (id: string, status: string, adminNote: string) => {
+    await supabase.from("return_requests").update({ status, admin_note: adminNote, updated_at: new Date().toISOString() }).eq("id", id);
+    setReturns(returns.map(r => r.id === id ? { ...r, status, admin_note: adminNote } : r));
   };
 
   if (loading) return (
@@ -77,6 +85,7 @@ export default function AdminPage() {
     { id:"products", label:"Products", icon:"◈", badge: null },
     { id:"customers", label:"Customers", icon:"◉", badge: null },
     { id:"messages", label:"Messages", icon:"◎", badge: messages.length > 0 ? messages.length : null },
+    { id:"returns", label:"Returns", icon:"↩", badge: returns.filter(r=>r.status==="requested").length > 0 ? returns.filter(r=>r.status==="requested").length : null },
   ];
 
   const filteredOrders = orders.filter(o => {
@@ -333,6 +342,8 @@ export default function AdminPage() {
 
           {section === "customers" && <CustomerSection supabase={supabase} />}
 
+          {section === "returns" && <ReturnsSection returns={returns} updateReturnStatus={updateReturnStatus} />}
+
           {section === "messages" && (
             <div>
               <div style={{marginBottom:"1.5rem"}}>
@@ -526,6 +537,138 @@ function CustomerSection({ supabase }: { supabase: any }) {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+function ReturnsSection({ returns, updateReturnStatus }: { returns: any[], updateReturnStatus: (id:string,status:string,note:string)=>void }) {
+  const [selectedReturn, setSelectedReturn] = useState<any>(null);
+  const [adminNote, setAdminNote] = useState("");
+  const [filter, setFilter] = useState("all");
+
+  const statusColor: any = { requested:"#FEF3C7", approved:"#D1FAE5", rejected:"#FEE2E2", picked_up:"#DBEAFE", refunded:"#D1FAE5" };
+  const statusText: any = { requested:"#92400E", approved:"#065F46", rejected:"#991B1B", picked_up:"#1E40AF", refunded:"#065F46" };
+
+  const filtered = filter === "all" ? returns : returns.filter(r => r.status === filter);
+
+  return (
+    <div>
+      <div style={{marginBottom:"1.5rem"}}>
+        <h1 style={{fontSize:"22px",fontWeight:600,color:"#111827",margin:0}}>Return Requests</h1>
+        <p style={{fontSize:"13px",color:"#6B7280",margin:"4px 0 0"}}>{returns.filter(r=>r.status==="requested").length} pending review · {returns.length} total</p>
+      </div>
+
+      {selectedReturn && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.4)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}} onClick={()=>setSelectedReturn(null)}>
+          <div style={{background:"white",borderRadius:"12px",width:"100%",maxWidth:"520px",padding:"1.75rem",boxShadow:"0 20px 60px rgba(0,0,0,0.15)"}} onClick={e=>e.stopPropagation()}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.25rem"}}>
+              <h2 style={{fontSize:"16px",fontWeight:700,color:"#111827",margin:0}}>Return Request</h2>
+              <button onClick={()=>setSelectedReturn(null)} style={{background:"#F3F4F6",border:"none",borderRadius:"6px",width:"32px",height:"32px",cursor:"pointer",fontSize:"16px"}}>✕</button>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"1.25rem"}}>
+              {[
+                {label:"Customer",value:selectedReturn.profile?.full_name||"—"},
+                {label:"Email",value:selectedReturn.profile?.email||"—"},
+                {label:"Phone",value:selectedReturn.profile?.phone||"—"},
+                {label:"Order",value:"#"+(selectedReturn.order_id||"").slice(0,8).toUpperCase()},
+                {label:"Product",value:selectedReturn.product_name},
+                {label:"Type",value:selectedReturn.type==="return"?"↩ Return & Refund":"🔄 Exchange"},
+                {label:"Reason",value:selectedReturn.reason?.replace(/_/g," ")},
+                {label:"Submitted",value:new Date(selectedReturn.created_at).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})},
+              ].map(f=>(
+                <div key={f.label} style={{background:"#F9FAFB",borderRadius:"6px",padding:"10px"}}>
+                  <div style={{fontSize:"10px",color:"#9CA3AF",marginBottom:"2px",textTransform:"uppercase",letterSpacing:"0.5px"}}>{f.label}</div>
+                  <div style={{fontSize:"13px",fontWeight:500,color:"#111827"}}>{f.value}</div>
+                </div>
+              ))}
+            </div>
+            {selectedReturn.description && (
+              <div style={{background:"#F9FAFB",borderRadius:"6px",padding:"12px",marginBottom:"1.25rem",fontSize:"13px",color:"#374151",lineHeight:1.6}}>
+                <div style={{fontSize:"10px",color:"#9CA3AF",marginBottom:"4px",textTransform:"uppercase",letterSpacing:"0.5px"}}>Customer Note</div>
+                {selectedReturn.description}
+              </div>
+            )}
+            <div style={{marginBottom:"1rem"}}>
+              <label style={{display:"block",fontSize:"11px",fontWeight:600,color:"#374151",marginBottom:"6px"}}>Admin Note (shown to customer)</label>
+              <textarea value={adminNote} onChange={e=>setAdminNote(e.target.value)} placeholder="e.g. Approved - pickup scheduled for Monday"
+                style={{width:"100%",padding:"10px 12px",fontSize:"13px",border:"1px solid #E5E7EB",borderRadius:"6px",outline:"none",minHeight:"70px",resize:"vertical",fontFamily:"'DM Sans',sans-serif",boxSizing:"border-box"}} />
+            </div>
+            <div style={{display:"flex",gap:"8px",flexWrap:"wrap"}}>
+              {selectedReturn.status==="requested" && <>
+                <button onClick={()=>{updateReturnStatus(selectedReturn.id,"approved",adminNote);setSelectedReturn(null);}}
+                  style={{flex:1,background:"#065F46",color:"white",border:"none",padding:"10px",borderRadius:"6px",fontSize:"13px",fontWeight:500,cursor:"pointer"}}>✓ Approve</button>
+                <button onClick={()=>{updateReturnStatus(selectedReturn.id,"rejected",adminNote);setSelectedReturn(null);}}
+                  style={{flex:1,background:"#DC2626",color:"white",border:"none",padding:"10px",borderRadius:"6px",fontSize:"13px",fontWeight:500,cursor:"pointer"}}>✕ Reject</button>
+              </>}
+              {selectedReturn.status==="approved" && (
+                <button onClick={()=>{updateReturnStatus(selectedReturn.id,"picked_up",adminNote);setSelectedReturn(null);}}
+                  style={{flex:1,background:"#1E40AF",color:"white",border:"none",padding:"10px",borderRadius:"6px",fontSize:"13px",fontWeight:500,cursor:"pointer"}}>📦 Mark Picked Up</button>
+              )}
+              {selectedReturn.status==="picked_up" && (
+                <button onClick={()=>{updateReturnStatus(selectedReturn.id,"refunded",adminNote);setSelectedReturn(null);}}
+                  style={{flex:1,background:"#065F46",color:"white",border:"none",padding:"10px",borderRadius:"6px",fontSize:"13px",fontWeight:500,cursor:"pointer"}}>💰 Mark Refunded</button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{display:"flex",gap:"8px",marginBottom:"1rem",flexWrap:"wrap"}}>
+        {["all","requested","approved","rejected","picked_up","refunded"].map(s=>(
+          <button key={s} onClick={()=>setFilter(s)}
+            style={{padding:"6px 14px",fontSize:"12px",border:"1px solid",borderColor:filter===s?"#6B1A2A":"#E5E7EB",borderRadius:"20px",background:filter===s?"#6B1A2A":"white",color:filter===s?"white":"#6B7280",cursor:"pointer",fontWeight:filter===s?600:400}}>
+            {s==="all"?"All":s.charAt(0).toUpperCase()+s.slice(1).replace("_"," ")}
+            {s!=="all"&&<span style={{marginLeft:"4px",opacity:0.7}}>({returns.filter(r=>r.status===s).length})</span>}
+          </button>
+        ))}
+      </div>
+
+      {filtered.length === 0 ? (
+        <div style={{background:"#fff",border:"1px solid #E5E7EB",borderRadius:"10px",padding:"3rem",textAlign:"center",color:"#9CA3AF",fontSize:"13px"}}>No return requests{filter!=="all"?` with status "${filter}"`:""}.</div>
+      ) : (
+        <div style={{background:"#fff",border:"1px solid #E5E7EB",borderRadius:"10px",overflow:"hidden"}}>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:"13px"}}>
+            <thead>
+              <tr style={{background:"#F9FAFB",borderBottom:"1px solid #E5E7EB"}}>
+                {["Date","Customer","Product","Type","Reason","Status","Action"].map(h=>(
+                  <th key={h} style={{padding:"10px 14px",textAlign:"left",fontSize:"11px",fontWeight:600,color:"#6B7280"}}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((r,i)=>(
+                <tr key={r.id} style={{borderBottom:"1px solid #F3F4F6",background:i%2===0?"#fff":"#FAFAFA"}}>
+                  <td style={{padding:"12px 14px",color:"#6B7280",fontSize:"12px",whiteSpace:"nowrap"}}>{new Date(r.created_at).toLocaleDateString("en-IN",{day:"numeric",month:"short"})}</td>
+                  <td style={{padding:"12px 14px"}}>
+                    <div style={{fontWeight:500,color:"#111827"}}>{r.profile?.full_name||"—"}</div>
+                    <div style={{fontSize:"11px",color:"#9CA3AF"}}>{r.profile?.email}</div>
+                  </td>
+                  <td style={{padding:"12px 14px",color:"#374151",maxWidth:"160px"}}>
+                    <div style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{r.product_name}</div>
+                  </td>
+                  <td style={{padding:"12px 14px"}}>
+                    <span style={{background:r.type==="return"?"#FEF3C7":"#EFF6FF",color:r.type==="return"?"#92400E":"#1E40AF",padding:"2px 8px",borderRadius:"4px",fontSize:"11px",fontWeight:500}}>
+                      {r.type==="return"?"↩ Return":"🔄 Exchange"}
+                    </span>
+                  </td>
+                  <td style={{padding:"12px 14px",color:"#6B7280",fontSize:"12px"}}>{r.reason?.replace(/_/g," ")}</td>
+                  <td style={{padding:"12px 14px"}}>
+                    <span style={{background:statusColor[r.status],color:statusText[r.status],padding:"2px 10px",borderRadius:"4px",fontSize:"11px",fontWeight:500}}>
+                      {r.status?.charAt(0).toUpperCase()+r.status?.slice(1).replace("_"," ")}
+                    </span>
+                  </td>
+                  <td style={{padding:"12px 14px"}}>
+                    <button onClick={()=>{setSelectedReturn(r);setAdminNote(r.admin_note||"");}}
+                      style={{background:"#6B1A2A",color:"white",border:"none",borderRadius:"6px",padding:"4px 12px",fontSize:"12px",cursor:"pointer",fontWeight:500}}>
+                      Review
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
