@@ -14,7 +14,19 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const searchRef = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
   const count = useCartStore((s) => s.count());
   const supabase = createClient();
 
@@ -144,8 +156,8 @@ export default function Navbar() {
 
             {/* Account */}
             {user ? (
-              <div style={{position:"relative"}} className="group">
-                <button style={{display:"flex",alignItems:"center",gap:"8px",background:"none",border:"none",cursor:"pointer",padding:"8px 4px",fontFamily:"'DM Sans',sans-serif"}}>
+              <div style={{position:"relative"}} ref={dropdownRef}>
+                <button onClick={()=>setDropdownOpen(!dropdownOpen)} style={{display:"flex",alignItems:"center",gap:"8px",background:"none",border:"none",cursor:"pointer",padding:"8px 4px",fontFamily:"'DM Sans',sans-serif"}}>
                   <div style={{width:"30px",height:"30px",borderRadius:"50%",background:"linear-gradient(135deg,#6B1A2A,#B8973C)",display:"flex",alignItems:"center",justifyContent:"center",color:"white",fontSize:"12px",fontWeight:600,flexShrink:0}}>
                     {(profile?.full_name || user?.email || "U").charAt(0).toUpperCase()}
                   </div>
@@ -156,7 +168,7 @@ export default function Navbar() {
                     <polyline points="6 9 12 15 18 9"/>
                   </svg>
                 </button>
-                <div style={{position:"absolute",right:0,top:"calc(100% + 4px)",background:"white",border:"1px solid #EDE6DC",borderRadius:"4px",boxShadow:"0 8px 24px rgba(0,0,0,0.08)",minWidth:"180px",zIndex:50,paddingTop:"6px",paddingBottom:"6px"}} className="hidden group-hover:block">
+                <div style={{position:"absolute",right:0,top:"calc(100% + 4px)",background:"white",border:"1px solid #EDE6DC",borderRadius:"4px",boxShadow:"0 8px 24px rgba(0,0,0,0.08)",minWidth:"180px",zIndex:50,paddingTop:"6px",paddingBottom:"6px",display:dropdownOpen?"block":"none"}}>
                   <div style={{padding:"10px 16px 8px",borderBottom:"1px solid #EDE6DC",marginBottom:"4px"}}>
                     <p style={{fontSize:"12px",fontWeight:600,color:"#2C2420",marginBottom:"2px"}}>{profile?.full_name || "My Account"}</p>
                     <p style={{fontSize:"11px",color:"#A09890"}}>{user?.email}</p>
@@ -166,7 +178,7 @@ export default function Navbar() {
                     {label:"My Orders", href:"/profile#orders"},
                     {label:"My Wishlist", href:"/wishlist", badge: wishlistCount},
                   ].map(item=>(
-                    <a key={item.label} href={item.href}
+                    <a key={item.label} href={item.href} onClick={()=>setDropdownOpen(false)}
                       style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"9px 16px",fontSize:"13px",color:"#6B635C",textDecoration:"none"}}
                       onMouseEnter={e=>{(e.currentTarget.style.background="#FAF8F3");(e.currentTarget.style.color="#6B1A2A")}}
                       onMouseLeave={e=>{(e.currentTarget.style.background="none");(e.currentTarget.style.color="#6B635C")}}>
@@ -182,7 +194,7 @@ export default function Navbar() {
                     </a>
                   )}
                   <div style={{borderTop:"1px solid #EDE6DC",marginTop:"4px",paddingTop:"4px"}}>
-                    <button onClick={handleSignOut}
+                    <button onClick={()=>{handleSignOut();setDropdownOpen(false);}}
                       style={{display:"block",width:"100%",textAlign:"left",padding:"9px 16px",fontSize:"13px",color:"#DC2626",background:"none",border:"none",cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}
                       onMouseEnter={e=>(e.currentTarget.style.background="#FEF2F2")}
                       onMouseLeave={e=>(e.currentTarget.style.background="none")}>
