@@ -15,7 +15,7 @@ export default function WishlistPage() {
     const ids: string[] = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
     if (ids.length === 0) { setLoading(false); setMounted(true); return; }
     supabase.from("products")
-      .select("id, name, slug, price, mrp, fabric, color, images")
+      .select("id, name, slug, price, mrp, fabric, color")
       .in("id", ids)
       .then(({ data }) => {
         setItems(data || []);
@@ -51,12 +51,12 @@ export default function WishlistPage() {
           ) : (
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"1.5rem"}}>
               {items.map(p => {
-                const img = p.images?.find((i:any)=>i.is_primary)||p.images?.[0];
+                const img = null; // images loaded separately
                 const discount = p.mrp ? Math.round(((p.mrp-p.price)/p.mrp)*100) : null;
                 return (
                   <div key={p.id} style={{background:"white",border:"1px solid #EDE6DC",borderRadius:"6px",overflow:"hidden"}}>
                     <a href={"/product/"+p.slug} style={{display:"block",aspectRatio:"3/4",background:"linear-gradient(145deg,#8B1A35,#C4416A)",textDecoration:"none",overflow:"hidden"}}>
-                      {img && <img src={img.url} alt={p.name} style={{width:"100%",height:"100%",objectFit:"cover"}}/>}
+                      {/* image placeholder until product images are set up */}
                     </a>
                     <div style={{padding:"1rem"}}>
                       <p style={{fontSize:"11px",color:"#A09890",textTransform:"uppercase",letterSpacing:"1px",marginBottom:"4px"}}>{p.fabric}</p>
