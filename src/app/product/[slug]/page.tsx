@@ -37,7 +37,25 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <p className="text-sm text-mid mb-6">🚚 Delivery in <strong className="text-dark">{product.delivery_days || "5–7 business days"}</strong></p>
               <hr className="border-gray-100 my-6" />
               {product.description && <p className="text-sm text-mid leading-relaxed mb-6">{product.description}</p>}
-              <ProductActions product={product} />
+              {/* Key product details */}
+      {(product.fabric || product.color || product.occasion || product.length_meters || product.blouse_piece || product.care_instructions) && (
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginBottom:"24px"}}>
+          {[
+            {label:"Fabric", value:product.fabric},
+            {label:"Colour", value:product.color},
+            {label:"Occasion", value:product.occasion},
+            {label:"Length", value:product.length_meters ? product.length_meters+"m" : null},
+            {label:"Blouse Piece", value:product.blouse_piece},
+            {label:"Care", value:product.care_instructions},
+          ].filter(d=>d.value).map(d=>(
+            <div key={d.label} style={{padding:"10px 12px",background:"#FAF8F3",border:"1px solid #EDE6DC",borderRadius:"4px"}}>
+              <div style={{fontSize:"10px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",marginBottom:"3px"}}>{d.label}</div>
+              <div style={{fontSize:"13px",color:"#2C2420",fontWeight:500}}>{d.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      <ProductActions product={product} />
             </div>
           </div>
         </div>
