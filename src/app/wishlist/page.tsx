@@ -8,7 +8,6 @@ export default function WishlistPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
