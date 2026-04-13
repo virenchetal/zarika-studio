@@ -10,6 +10,7 @@ export default function AdminPage() {
   const [section, setSection] = useState("dashboard");
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
+  const [orderFilter, setOrderFilter] = useState({ status: "all", payment: "all", search: "" });
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
