@@ -26,7 +26,7 @@ export default function CheckoutPage() {
     // Redirect if cart is empty
     if (items.length === 0 && step !== 3) { router.push("/shop"); return; }
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { router.push("/"); return; }
+      if (!user) { router.push("/?signin=required&next=/checkout"); return; }
       setUser(user);
       supabase.from("addresses").select("*").eq("user_id", user.id).then(({ data }) => {
         setAddresses(data || []);
@@ -55,6 +55,8 @@ export default function CheckoutPage() {
     if (order) {
       await supabase.from("order_items").insert(orderItems.map(i => ({ ...i, order_id: order.id })));
       clearCart();
+      // Replace history so back button doesn't return to checkout
+      window.history.replaceState(null, "", "/checkout");
       setStep(3);
     }
     setPlacing(false);

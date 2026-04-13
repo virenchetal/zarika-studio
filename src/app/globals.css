@@ -50,3 +50,5 @@
 .swatch-s6 { background: linear-gradient(145deg, #1A5A5A, #2D8B8B); }
 .swatch-s7 { background: linear-gradient(145deg, #6B5A1A, #A08B2C); }
 .swatch-s8 { background: linear-gradient(145deg, #5A1A3D, #8B2C6B); }
+
+@media (max-width: 768px) { .fixed-whatsapp { bottom: 80px !important; right: 16px !important; } }

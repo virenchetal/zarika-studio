@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useCartStore } from "@/lib/store/cart";
 import CartDrawer from "@/components/cart/CartDrawer";
 import AuthModal from "@/components/auth/AuthModal";
+import { useEffect, useRef } from "react";
 
 export default function Navbar() {
   const [user, setUser] = useState<any>(null);
@@ -11,6 +12,34 @@ export default function Navbar() {
   const [cartOpen, setCartOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [wishlistCount, setWishlistCount] = useState(0);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const wl = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
+    setWishlistCount(wl.length);
+    const handler = () => {
+      const wl2 = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
+      setWishlistCount(wl2.length);
+    };
+    window.addEventListener("zarika-wishlist-update", handler);
+    return () => window.removeEventListener("zarika-wishlist-update", handler);
+  }, []);
+
+  useEffect(() => {
+    if (searchOpen && searchRef.current) searchRef.current.focus();
+  }, [searchOpen]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = `/shop?search=${encodeURIComponent(searchQuery.trim())}`;
+      setSearchOpen(false);
+      setSearchQuery("");
+    }
+  };
   const count = useCartStore((s) => s.count());
   const supabase = createClient();
 
@@ -43,6 +72,17 @@ export default function Navbar() {
       </div>
 
       <nav className="bg-white border-b border-border-light sticky top-0 z-[200]">
+      {searchOpen && (
+        <div style={{position:"absolute",top:"100%",left:0,right:0,background:"white",borderBottom:"1px solid #EDE6DC",padding:"1rem 2rem",zIndex:300,boxShadow:"0 4px 12px rgba(0,0,0,0.08)"}}>
+          <form onSubmit={handleSearch} style={{maxWidth:"600px",margin:"0 auto",display:"flex",gap:"10px"}}>
+            <input ref={searchRef} value={searchQuery} onChange={e=>setSearchQuery(e.target.value)}
+              placeholder="Search sarees, fabrics, occasions..."
+              style={{flex:1,padding:"10px 16px",border:"1px solid #E4DAD0",borderRadius:"4px",fontSize:"14px",fontFamily:"'DM Sans',sans-serif",outline:"none"}} />
+            <button type="submit" style={{background:"#6B1A2A",color:"white",border:"none",padding:"10px 20px",borderRadius:"4px",fontSize:"12px",letterSpacing:"1px",textTransform:"uppercase",cursor:"pointer"}}>Search</button>
+            <button type="button" onClick={()=>setSearchOpen(false)} style={{background:"none",border:"1px solid #E4DAD0",padding:"10px 14px",borderRadius:"4px",cursor:"pointer",color:"#A09890"}}>✕</button>
+          </form>
+        </div>
+      )}
         <div className="max-w-[1280px] mx-auto px-4 md:px-4 md:px-10 flex items-center justify-between h-14 md:h-16">
           <a href="/" className="font-serif text-xl font-semibold tracking-[3px] text-maroon uppercase">
             Zarika<span className="text-gold font-light"> Studio</span>
@@ -68,8 +108,13 @@ export default function Navbar() {
         <div className="w-5 h-0.5 bg-current"></div>
       </button>
       <div className="flex items-center gap-3">
-            <button className="text-dark hover:text-maroon text-lg p-1">🔍</button>
-            <a href="/profile#wishlist" className="text-dark hover:text-maroon text-lg p-1">♡</a>
+            <button onClick={()=>setSearchOpen(!searchOpen)} className="text-dark hover:text-maroon text-lg p-1" aria-label="Search">🔍</button>
+            <a href="/wishlist" className="relative text-dark hover:text-maroon text-lg p-1" aria-label="Wishlist">
+              ♡
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1.5 bg-maroon text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-medium">{wishlistCount}</span>
+              )}
+            </a>
 
             <button onClick={() => setCartOpen(true)}
               className="relative text-dark hover:text-maroon text-lg p-1">
