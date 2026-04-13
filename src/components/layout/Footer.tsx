@@ -10,12 +10,10 @@ const footerLinks = {
     { label: "Shipping Info", href: "/shipping" },
     { label: "Returns & Exchanges", href: "/returns" },
     { label: "Track Your Order", href: "/profile#orders" },
-    { label: "Care Guide", href: "/shipping" },
     { label: "Contact Us", href: "/contact" },
   ],
   Company: [
     { label: "About Us", href: "/about" },
-    { label: "Our Weavers", href: "/about" },
     { label: "Terms of Service", href: "/terms" },
     { label: "Privacy Policy", href: "/privacy" },
   ],
@@ -33,7 +31,7 @@ export default function Footer() {
             Handpicked sarees from master weavers across India. Every piece is a work of art, every thread a story.
           </p>
           <p className="text-xs" style={{ color: "rgba(255,255,255,0.25)" }}>
-            📞 +91 98765 00000 · Bengaluru, India
+            📞 +91 63048 24387 · Hyderabad, India
           </p>
         </div>
         {Object.entries(footerLinks).map(([title, links]) => (
