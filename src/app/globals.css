@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #FAF8F3;
+  --cream2: #F3EDE3;
+  --cream3: #EDE4D6;
+  --gold: #B8973C;
+  --gold-light: #D4AF62;
+  --gold-pale: #F5EDD8;
+  --maroon: #6B1A2A;
+  --maroon-light: #8B2238;
+  --maroon-pale: #F9F0F2;
+  --charcoal: #1A1614;
+  --dark: #2C2420;
+  --mid: #6B635C;
+  --light: #A09890;
+  --border: #E4DAD0;
+  --border-light: #EDE6DC;
+  --success: #2D8A3E;
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font-dm-sans), sans-serif; }
+  h1, h2, h3, h4 { font-family: var(--font-cormorant), serif; }
+}
+
+@layer utilities {
+  .font-serif { font-family: var(--font-cormorant), serif; }
+  .font-sans  { font-family: var(--font-dm-sans), sans-serif; }
+  .bg-cream   { background-color: var(--cream); }
+  .bg-cream2  { background-color: var(--cream2); }
+  .text-charcoal { color: var(--charcoal); }
+  .text-maroon   { color: var(--maroon); }
+  .text-gold     { color: var(--gold); }
+  .text-mid      { color: var(--mid); }
+  .text-light-z  { color: var(--light); }
+  .border-z      { border-color: var(--border); }
+  .border-z-light { border-color: var(--border-light); }
+}
+
+/* Saree color swatches */
+.swatch-s1 { background: linear-gradient(145deg, #8B1A35, #C4416A); }
+.swatch-s2 { background: linear-gradient(145deg, #1A3D6B, #2E6AAD); }
+.swatch-s3 { background: linear-gradient(145deg, #1E5C2E, #3A9650); }
+.swatch-s4 { background: linear-gradient(145deg, #6B3D1A, #A0622C); }
+.swatch-s5 { background: linear-gradient(145deg, #3D1A6B, #6B3DA8); }
+.swatch-s6 { background: linear-gradient(145deg, #1A5A5A, #2D8B8B); }
+.swatch-s7 { background: linear-gradient(145deg, #6B5A1A, #A08B2C); }
+.swatch-s8 { background: linear-gradient(145deg, #5A1A3D, #8B2C6B); }
