@@ -20,7 +20,7 @@ export default function ProductActions({ product }: { product: Product }) {
     });
   }, [product.id]);
 
-  const toggleWishlist = () => {
+  const toggleWishlist = async () => {
     if (!userId) { toast.error("Please sign in to save items"); return; }
     if (wishlisted) {
       await supabase.from("wishlists").delete().eq("user_id", userId).eq("product_id", product.id);
