@@ -62,7 +62,7 @@ export default function CheckoutPage() {
           <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"40px",fontWeight:400,color:"#2C2420",marginBottom:"1rem"}}>Order Confirmed!</h1>
           <p style={{fontSize:"14px",color:"#6B635C",marginBottom:"2rem"}}>Thank you for your order. We'll send you an update when it ships.</p>
           <div style={{display:"flex",gap:"12px",justifyContent:"center"}}>
-            <a href="/profile" style={{background:"#6B1A2A",color:"white",padding:"14px 32px",fontSize:"11px",letterSpacing:"2px",textTransform:"uppercase",textDecoration:"none"}}>View Orders</a>
+            <a href="/profile#orders" style={{background:"#6B1A2A",color:"white",padding:"14px 32px",fontSize:"11px",letterSpacing:"2px",textTransform:"uppercase",textDecoration:"none"}}>View Orders</a>
             <a href="/shop" style={{background:"none",border:"1.5px solid #6B1A2A",color:"#6B1A2A",padding:"13px 32px",fontSize:"11px",letterSpacing:"2px",textTransform:"uppercase",textDecoration:"none"}}>Continue Shopping</a>
           </div>
         </div>
