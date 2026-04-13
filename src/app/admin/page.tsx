@@ -157,31 +157,67 @@ export default function AdminPage() {
 
           {/* ORDERS */}
           {section === "orders" && (
-            <div>
-              <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"32px",fontWeight:400,color:"#2C2420",marginBottom:"2rem"}}>Order Management</h1>
-              <div style={{background:"white",border:"1px solid #EDE6DC",borderRadius:"6px",padding:"1.5rem"}}>
+            <div style={{background:"white",border:"1px solid #EDE6DC",borderRadius:"6px",overflow:"hidden"}}>
+              <div style={{padding:"1.25rem 1.5rem",borderBottom:"1px solid #EDE6DC"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1rem"}}>
+                  <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"22px",fontWeight:400,color:"#2C2420",margin:0}}>Order Management</h2>
+                  <span style={{fontSize:"12px",color:"#A09890"}}>{orders.length} total orders</span>
+                </div>
+                <div style={{display:"flex",gap:"10px",flexWrap:"wrap"}}>
+                  <input placeholder="Search by customer or order ID..." value={orderFilter.search} onChange={e=>setOrderFilter({...orderFilter,search:e.target.value})}
+                    style={{flex:1,minWidth:"200px",padding:"7px 12px",fontSize:"12px",border:"1px solid #E4DAD0",borderRadius:"3px",outline:"none"}} />
+                  <select value={orderFilter.status} onChange={e=>setOrderFilter({...orderFilter,status:e.target.value})}
+                    style={{padding:"7px 12px",fontSize:"12px",border:"1px solid #E4DAD0",borderRadius:"3px",background:"white",color:"#2C2420"}}>
+                    <option value="all">All Statuses</option>
+                    {["placed","processing","shipped","delivered","cancelled"].map(s=><option key={s} value={s}>{s}</option>)}
+                  </select>
+                  <select value={orderFilter.payment} onChange={e=>setOrderFilter({...orderFilter,payment:e.target.value})}
+                    style={{padding:"7px 12px",fontSize:"12px",border:"1px solid #E4DAD0",borderRadius:"3px",background:"white",color:"#2C2420"}}>
+                    <option value="all">All Payments</option>
+                    <option value="cod">COD</option>
+                    <option value="upi">UPI</option>
+                    <option value="card">Card</option>
+                  </select>
+                </div>
+              </div>
+              <div style={{overflowX:"auto"}}>
                 <table style={{width:"100%",borderCollapse:"collapse",fontSize:"13px"}}>
-                  <thead><tr style={{borderBottom:"1px solid #EDE6DC"}}>
-                    {["Order ID","Customer","Items","Amount","Payment","Status","Update"].map(h=><th key={h} style={{textAlign:"left",padding:"10px 12px",fontSize:"10px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890"}}>{h}</th>)}
+                  <thead><tr style={{background:"#FAF8F3",borderBottom:"1px solid #EDE6DC"}}>
+                    {["Order ID","Date","Customer","Items","Amount","Payment","Pay Status","Status","Update"].map(h=>(
+                      <th key={h} style={{padding:"10px 12px",textAlign:"left",fontSize:"10px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",fontWeight:500,whiteSpace:"nowrap"}}>{h}</th>
+                    ))}
                   </tr></thead>
                   <tbody>
-                    {orders.map(o=>(
+                    {orders.filter(o=>{
+                      if(orderFilter.status!=="all"&&o.status!==orderFilter.status) return false;
+                      if(orderFilter.payment!=="all"&&o.payment_method!==orderFilter.payment) return false;
+                      if(orderFilter.search){const q=orderFilter.search.toLowerCase();if(!o.id.includes(q)&&!(o.profile?.full_name||"").toLowerCase().includes(q)) return false;}
+                      return true;
+                    }).map(o=>(
                       <tr key={o.id} style={{borderBottom:"1px solid #EDE6DC"}}>
-                        <td style={{padding:"13px 12px",fontWeight:500,fontSize:"12px"}}>#{o.id.slice(0,8).toUpperCase()}</td>
-                        <td style={{padding:"13px 12px",color:"#6B635C"}}>{o.profile?.full_name || o.profile?.email || "—"}</td>
-                        <td style={{padding:"13px 12px"}}>{o.items?.length || 0} items</td>
-                        <td style={{padding:"13px 12px",fontWeight:500,color:"#6B1A2A"}}>₹{o.total?.toLocaleString("en-IN")}</td>
-                        <td style={{padding:"13px 12px"}}><span style={{fontSize:"11px",color:"#6B635C"}}>{o.payment_method?.toUpperCase()}</span></td>
-                        <td style={{padding:"13px 12px"}}><span style={{background:statusColor[o.status]||"#F3F4F6",color:statusText[o.status]||"#374151",padding:"3px 10px",borderRadius:"10px",fontSize:"11px",fontWeight:500}}>{o.status}</span></td>
-                        <td style={{padding:"13px 12px",display:"flex",gap:"8px",alignItems:"center"}}>
-                          <select value={o.status} onChange={e=>updateOrderStatus(o.id,e.target.value)} style={{fontSize:"12px",border:"1px solid #E4DAD0",borderRadius:"3px",padding:"4px 8px",background:"#FAF8F3",cursor:"pointer"}}>
-                            {["placed","processing","shipped","delivered","cancelled"].map(s=><option key={s} value={s}>{s}</option>)}
-                          </select>
-                          <button onClick={()=>setSelectedOrder(o)} style={{fontSize:"11px",background:"#FAF8F3",border:"1px solid #E4DAD0",borderRadius:"3px",padding:"4px 10px",cursor:"pointer",color:"#6B635C",whiteSpace:"nowrap"}}>View</button>
+                        <td style={{padding:"12px",fontWeight:500,color:"#2C2420",fontFamily:"monospace",whiteSpace:"nowrap"}}>#{o.id.slice(0,8).toUpperCase()}</td>
+                        <td style={{padding:"12px",color:"#A09890",fontSize:"12px",whiteSpace:"nowrap"}}>{new Date(o.created_at).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}</td>
+                        <td style={{padding:"12px",color:"#2C2420",whiteSpace:"nowrap"}}>{o.profile?.full_name||"—"}</td>
+                        <td style={{padding:"12px",color:"#6B635C",textAlign:"center"}}>{o.items?.length||0}</td>
+                        <td style={{padding:"12px",color:"#6B1A2A",fontWeight:500,whiteSpace:"nowrap"}}>₹{o.total?.toLocaleString("en-IN")}</td>
+                        <td style={{padding:"12px",color:"#6B635C"}}>{o.payment_method?.toUpperCase()}</td>
+                        <td style={{padding:"12px"}}>
+                          <span style={{background:o.payment_status==="paid"?"#D1FAE5":"#FEF3C7",color:o.payment_status==="paid"?"#065F46":"#92400E",padding:"3px 8px",borderRadius:"10px",fontSize:"11px",fontWeight:500,whiteSpace:"nowrap"}}>
+                            {o.payment_status||"pending"}
+                          </span>
+                        </td>
+                        <td style={{padding:"12px"}}><span style={{background:statusColor[o.status]||"#F3F4F6",color:statusText[o.status]||"#374151",padding:"3px 10px",borderRadius:"10px",fontSize:"11px",fontWeight:500,whiteSpace:"nowrap"}}>{o.status}</span></td>
+                        <td style={{padding:"12px"}}>
+                          <div style={{display:"flex",gap:"6px",alignItems:"center"}}>
+                            <select value={o.status} onChange={e=>updateOrderStatus(o.id,e.target.value)} style={{fontSize:"12px",border:"1px solid #E4DAD0",borderRadius:"3px",padding:"4px 6px",background:"white",color:"#2C2420"}}>
+                              {["placed","processing","shipped","delivered","cancelled"].map(s=><option key={s} value={s}>{s}</option>)}
+                            </select>
+                            <button onClick={()=>setSelectedOrder(o)} style={{background:"#6B1A2A",color:"white",border:"none",borderRadius:"3px",padding:"4px 10px",fontSize:"12px",cursor:"pointer",whiteSpace:"nowrap"}}>View</button>
+                          </div>
                         </td>
                       </tr>
                     ))}
-                    {orders.length===0&&<tr><td colSpan={7} style={{padding:"2rem",textAlign:"center",color:"#A09890"}}>No orders yet</td></tr>}
+                    {orders.length===0&&<tr><td colSpan={9} style={{padding:"2rem",textAlign:"center",color:"#A09890"}}>No orders yet</td></tr>}
                   </tbody>
                 </table>
               </div>
