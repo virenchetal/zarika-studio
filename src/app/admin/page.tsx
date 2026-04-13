@@ -21,7 +21,7 @@ export default function AdminPage() {
       const { data: p } = await supabase.from("profiles").select("*").eq("id", user.id).single();
       if (!p?.is_admin) { router.push("/"); return; }
       setProfile(p);
-      const { data: o, error: oErr } = await supabase.from("orders").select("*, items:order_items(*)").order("created_at", { ascending: false });
+      const { data: o, error: oErr } = await supabase.from("orders").select("*, items:order_items(*), address:addresses(*)").order("created_at", { ascending: false });
       console.log("ORDERS FETCH:", { count: o?.length, error: oErr?.message, code: oErr?.code });
       if (o && o.length > 0) {
         const userIds = Array.from(new Set(o.map((order: any) => order.user_id)));
@@ -285,6 +285,17 @@ function OrderDetailModal({ order, onClose }: { order: any, onClose: ()=>void })
             </div>
           ))}
         </div>
+        {order.address && (
+          <div style={{marginBottom:"1.5rem"}}>
+            <h3 style={{fontSize:"12px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",marginBottom:"10px"}}>Delivery Address</h3>
+            <div style={{padding:"12px",background:"#FAF8F3",border:"1px solid #EDE6DC",borderRadius:"4px",fontSize:"13px",color:"#2C2420",lineHeight:1.7}}>
+              <div style={{fontWeight:500}}>{order.address.full_name}</div>
+              <div>{order.address.line1}{order.address.line2 ? ", " + order.address.line2 : ""}</div>
+              <div>{order.address.city}, {order.address.state} – {order.address.pincode}</div>
+              <div style={{color:"#6B635C"}}>{order.address.phone}</div>
+            </div>
+          </div>
+        )}
         <h3 style={{fontSize:"12px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",marginBottom:"10px"}}>Items Ordered</h3>
         {(order.items||[]).map((item: any)=>(
           <div key={item.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #EDE6DC"}}>
