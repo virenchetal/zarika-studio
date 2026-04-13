@@ -35,6 +35,12 @@ export default function AdminPage() {
       setProducts(pr || []);
       const { data: msgs } = await supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
       const { data: ret } = await supabase.from("return_requests").select("*, order:orders(id,total)").order("created_at", { ascending: false });
+      if (ret && ret.length > 0) {
+        const retUserIds = Array.from(new Set(ret.map((r: any) => r.user_id)));
+        const { data: retProfiles } = await supabase.from("profiles").select("id, full_name, email, phone").in("id", retUserIds);
+        const retProfileMap = Object.fromEntries((retProfiles || []).map((p: any) => [p.id, p]));
+        ret.forEach((r: any) => { r.profile = retProfileMap[r.user_id] || null; });
+      }
       setReturns(ret || []);
       setMessages(msgs || []);
       setLoading(false);
