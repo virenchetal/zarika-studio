@@ -18,6 +18,9 @@ export default function ProfilePage() {
     return "profile";
   });
   const [saving, setSaving] = useState(false);
+  const [pwForm, setPwForm] = useState({ current: "", newPw: "", confirm: "" });
+  const [showPw, setShowPw] = useState({ current: false, newPw: false, confirm: false });
+  const [pwSaving, setPwSaving] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<any>(null);
   const [addressForm, setAddressForm] = useState({ label:"Home", full_name:"", phone:"", line1:"", line2:"", city:"", state:"", pincode:"", is_default:false });
@@ -54,6 +57,20 @@ export default function ProfilePage() {
     }
     setSaving(false);
     alert("Profile updated successfully!");
+  };
+
+  const changePassword = async () => {
+    if (!pwForm.current || !pwForm.newPw || !pwForm.confirm) { alert("Please fill all fields."); return; }
+    if (pwForm.newPw !== pwForm.confirm) { alert("New passwords do not match."); return; }
+    if (pwForm.newPw.length < 6) { alert("Password must be at least 6 characters."); return; }
+    setPwSaving(true);
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email: user.email!, password: pwForm.current });
+    if (signInError) { alert("Current password is incorrect."); setPwSaving(false); return; }
+    const { error } = await supabase.auth.updateUser({ password: pwForm.newPw });
+    setPwSaving(false);
+    if (error) { alert(error.message); return; }
+    alert("Password updated successfully!");
+    setPwForm({ current: "", newPw: "", confirm: "" });
   };
 
   const saveAddress = async () => {
@@ -96,6 +113,7 @@ export default function ProfilePage() {
     { id:"profile", label:"My Profile", icon:"👤" },
     { id:"orders", label:"My Orders", icon:"📦" },
     { id:"addresses", label:"Addresses", icon:"📍" },
+    { id:"security", label:"Security", icon:"🔒" },
   ];
 
   if (!user) return <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center"}}><p>Loading...</p></div>;
@@ -298,6 +316,51 @@ export default function ProfilePage() {
                   ))}
                   {addresses.length===0&&!showAddressForm&&<div style={{gridColumn:"1/-1",background:"white",border:"1px solid #EDE6DC",borderRadius:"6px",padding:"2rem",textAlign:"center",color:"#A09890",fontSize:"13px"}}>No saved addresses yet.</div>}
                 </div>
+              </div>
+            )}
+            {/* Security */}
+            {section === "security" && (
+              <div style={{background:"white",border:"1px solid #EDE6DC",borderRadius:"6px",padding:"1.75rem"}}>
+                <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"24px",fontWeight:400,color:"#2C2420",marginBottom:"0.5rem"}}>Change Password</h2>
+                <p style={{fontSize:"13px",color:"#A09890",marginBottom:"1.75rem"}}>Update your account password</p>
+                {user?.app_metadata?.provider === "google" ? (
+                  <div style={{padding:"1rem",background:"#F9F0F2",borderRadius:"4px",border:"1px solid #EDE6DC",fontSize:"13px",color:"#6B635C"}}>
+                    You signed in with Google. Password management is handled by your Google account.
+                  </div>
+                ) : (
+                  <div style={{display:"flex",flexDirection:"column",gap:"16px",maxWidth:"420px"}}>
+                    {[
+                      {label:"Current Password",key:"current"},
+                      {label:"New Password",key:"newPw"},
+                      {label:"Confirm New Password",key:"confirm"},
+                    ].map(({label,key})=>(
+                      <div key={key}>
+                        <label style={{display:"block",fontSize:"10px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",marginBottom:"6px",fontWeight:500}}>{label}</label>
+                        <div style={{position:"relative"}}>
+                          <input
+                            type={showPw[key as keyof typeof showPw]?"text":"password"}
+                            value={pwForm[key as keyof typeof pwForm]}
+                            onChange={e=>setPwForm({...pwForm,[key]:e.target.value})}
+                            style={{width:"100%",background:"#FAF8F3",border:"1px solid #E4DAD0",borderRadius:"3px",padding:"11px 40px 11px 14px",fontSize:"14px",fontFamily:"'DM Sans',sans-serif",outline:"none",boxSizing:"border-box"}}
+                            placeholder="••••••••"
+                          />
+                          <button type="button" onClick={()=>setShowPw({...showPw,[key]:!showPw[key as keyof typeof showPw]})}
+                            style={{position:"absolute",right:"12px",top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"#A09890",padding:0,display:"flex",alignItems:"center"}}>
+                            {showPw[key as keyof typeof showPw] ? (
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                            ) : (
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    <button onClick={changePassword} disabled={pwSaving}
+                      style={{background:"#6B1A2A",color:"white",border:"none",padding:"11px 24px",fontSize:"11px",letterSpacing:"1px",textTransform:"uppercase",cursor:"pointer",borderRadius:"3px",opacity:pwSaving?0.7:1,alignSelf:"flex-start",marginTop:"8px"}}>
+                      {pwSaving?"Updating...":"Update Password"}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
