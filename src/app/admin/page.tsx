@@ -34,7 +34,7 @@ export default function AdminPage() {
       const { data: pr } = await supabase.from("products").select("*, category:categories(name)").order("created_at", { ascending: false });
       setProducts(pr || []);
       const { data: msgs } = await supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
-      const { data: ret } = await supabase.from("return_requests").select("*, order:orders(id,total), profile:profiles!return_requests_user_id_fkey(full_name,email,phone)").order("created_at", { ascending: false });
+      const { data: ret } = await supabase.from("return_requests").select("*, order:orders(id,total)").order("created_at", { ascending: false });
       setReturns(ret || []);
       setMessages(msgs || []);
       setLoading(false);
