@@ -201,7 +201,7 @@ export default function Navbar() {
 
             {/* Mobile hamburger */}
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              style={{background:"none",border:"none",cursor:"pointer",padding:"8px",display:"flex",flexDirection:"column",gap:"5px",marginLeft:"4px"}}
+              style={{background:"none",border:"none",cursor:"pointer",padding:"8px",flexDirection:"column",gap:"5px",marginLeft:"4px"}}
               className="md:hidden">
               <div style={{width:"20px",height:"1.5px",background:"#2C2420"}}></div>
               <div style={{width:"20px",height:"1.5px",background:"#2C2420"}}></div>
