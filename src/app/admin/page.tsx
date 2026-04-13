@@ -9,6 +9,7 @@ export default function AdminPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [section, setSection] = useState("dashboard");
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [messages, setMessages] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
@@ -32,6 +33,8 @@ export default function AdminPage() {
       setOrders(o || []);
       const { data: pr } = await supabase.from("products").select("*, category:categories(name)").order("created_at", { ascending: false });
       setProducts(pr || []);
+      const { data: msgs } = await supabase.from("contact_messages").select("*").order("created_at", { ascending: false });
+      setMessages(msgs || []);
       setLoading(false);
     }
     load();
@@ -60,6 +63,7 @@ export default function AdminPage() {
     { id:"orders", label:"Orders", icon:"📦" },
     { id:"products", label:"Products", icon:"🧵" },
     { id:"customers", label:"Customers", icon:"👤" },
+    { id:"messages", label:"Messages", icon:"✉️" },
   ];
 
   return (
@@ -221,6 +225,36 @@ export default function AdminPage() {
 
           {/* CUSTOMERS */}
           {section === "customers" && <CustomerSection supabase={supabase} />}
+
+          {section === "messages" && (
+            <div style={{background:"white",border:"1px solid #EDE6DC",borderRadius:"6px",overflow:"hidden"}}>
+              <div style={{padding:"1.25rem 1.5rem",borderBottom:"1px solid #EDE6DC",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"22px",fontWeight:400,color:"#2C2420",margin:0}}>Contact Messages</h2>
+                <span style={{fontSize:"12px",color:"#A09890"}}>{messages.length} message{messages.length!==1?"s":""}</span>
+              </div>
+              {messages.length === 0 ? (
+                <div style={{padding:"3rem",textAlign:"center",color:"#A09890",fontSize:"13px"}}>No messages yet.</div>
+              ) : (
+                <div style={{display:"flex",flexDirection:"column",gap:0}}>
+                  {messages.map((msg,i) => (
+                    <div key={msg.id} style={{padding:"1.25rem 1.5rem",borderBottom:i<messages.length-1?"1px solid #EDE6DC":"none",background:i%2===0?"white":"#FAFAF8"}}>
+                      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"8px",flexWrap:"wrap",gap:"8px"}}>
+                        <div>
+                          <span style={{fontWeight:500,fontSize:"14px",color:"#2C2420"}}>{msg.name}</span>
+                          <span style={{fontSize:"12px",color:"#A09890",marginLeft:"10px"}}>{msg.email}</span>
+                          {msg.phone && <span style={{fontSize:"12px",color:"#A09890",marginLeft:"10px"}}>{msg.phone}</span>}
+                        </div>
+                        <span style={{fontSize:"11px",color:"#A09890"}}>{new Date(msg.created_at).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"})}</span>
+                      </div>
+                      {msg.subject && <div style={{fontSize:"12px",fontWeight:500,color:"#6B1A2A",marginBottom:"6px",textTransform:"uppercase",letterSpacing:"0.5px"}}>{msg.subject}</div>}
+                      <div style={{fontSize:"13px",color:"#4A4340",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{msg.message}</div>
+                      <a href={`mailto:${msg.email}`} style={{display:"inline-block",marginTop:"10px",fontSize:"11px",color:"#B8973C",border:"1px solid #B8973C",borderRadius:"3px",padding:"4px 12px",textDecoration:"none"}}>Reply via Email</a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

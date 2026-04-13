@@ -9,19 +9,29 @@ export default function ProductActions({ product }: { product: Product }) {
   const primaryImage = product.images?.find((i: any) => i.is_primary) || product.images?.[0];
   const [viewers, setViewers] = useState(0);
   const [wishlisted, setWishlisted] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const ids: string[] = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
-    setWishlisted(ids.includes(product.id));
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      setUserId(user.id);
+      supabase.from("wishlists").select("id").eq("user_id", user.id).eq("product_id", product.id).single()
+        .then(({ data }) => setWishlisted(!!data));
+    });
   }, [product.id]);
 
   const toggleWishlist = () => {
-    const ids: string[] = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
-    const updated = wishlisted ? ids.filter(i => i !== product.id) : [...ids, product.id];
-    localStorage.setItem("zarika-wishlist", JSON.stringify(updated));
+    if (!userId) { toast.error("Please sign in to save items"); return; }
+    if (wishlisted) {
+      await supabase.from("wishlists").delete().eq("user_id", userId).eq("product_id", product.id);
+      setWishlisted(false);
+      toast("Removed from wishlist");
+    } else {
+      await supabase.from("wishlists").insert({ user_id: userId, product_id: product.id });
+      setWishlisted(true);
+      toast("Added to wishlist ♡");
+    }
     window.dispatchEvent(new Event("zarika-wishlist-update"));
-    setWishlisted(!wishlisted);
-    toast(wishlisted ? "Removed from wishlist" : "Added to wishlist ♡");
   };
 
   useEffect(() => {

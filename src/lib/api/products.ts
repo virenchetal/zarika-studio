@@ -9,6 +9,7 @@ export async function getProducts(filters?: {
   sort?: string;
   featured?: boolean;
   limit?: number;
+  search?: string;
 }) {
   const supabase = await createClient();
   let query = supabase
@@ -18,6 +19,7 @@ export async function getProducts(filters?: {
     .order("created_at", { ascending: false });
 
   if (filters?.featured) query = query.eq("is_featured", true);
+  if (filters?.search) query = query.ilike("name", `%${filters.search}%`);
   if (filters?.limit) query = query.limit(filters.limit);
   if (filters?.minPrice) query = query.gte("price", filters.minPrice);
   if (filters?.maxPrice) query = query.lte("price", filters.maxPrice);
