@@ -31,12 +31,14 @@ export default function Navbar() {
   const supabase = createClient();
 
   useEffect(() => {
-    const wl = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
-    setWishlistCount(wl.length);
-    const handler = () => {
-      const wl2 = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
-      setWishlistCount(wl2.length);
+    const fetchWishlistCount = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setWishlistCount(0); return; }
+      const { count } = await supabase.from("wishlists").select("id", { count: "exact", head: true }).eq("user_id", user.id);
+      setWishlistCount(count || 0);
     };
+    fetchWishlistCount();
+    const handler = () => fetchWishlistCount();
     window.addEventListener("zarika-wishlist-update", handler);
     return () => window.removeEventListener("zarika-wishlist-update", handler);
   }, []);
