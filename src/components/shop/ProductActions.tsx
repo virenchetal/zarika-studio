@@ -9,6 +9,7 @@ export default function ProductActions({ product }: { product: Product }) {
   const primaryImage = product.images?.find((i: any) => i.is_primary) || product.images?.[0];
   const [viewers, setViewers] = useState(0);
   const [wishlisted, setWishlisted] = useState(false);
+  const supabase = createClient();
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
