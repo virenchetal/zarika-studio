@@ -7,9 +7,12 @@ import { createClient } from "@/lib/supabase/client";
 export default function WishlistPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
+    setMounted(true);
     const ids: string[] = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
     if (ids.length === 0) { setLoading(false); return; }
     supabase.from("products").select("id, name, slug, price, mrp, fabric, color, images").in("id", ids)
@@ -32,7 +35,7 @@ export default function WishlistPage() {
           <p style={{fontSize:"11px",letterSpacing:"2px",textTransform:"uppercase",color:"#B8973C",marginBottom:"8px"}}>Saved Items</p>
           <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"40px",fontWeight:400,color:"#2C2420",marginBottom:"2rem"}}>My Wishlist {items.length > 0 && <span style={{fontSize:"20px",color:"#A09890"}}>({items.length})</span>}</h1>
           {loading ? (
-            <p style={{color:"#A09890"}}>Loading...</p>
+            <p style={{color:"#A09890",fontFamily:"'Cormorant Garamond',serif",fontSize:"20px",padding:"4rem",textAlign:"center"}}>Loading your wishlist...</p>
           ) : items.length === 0 ? (
             <div style={{textAlign:"center",padding:"4rem 2rem"}}>
               <p style={{fontSize:"48px",marginBottom:"1rem"}}>♡</p>
