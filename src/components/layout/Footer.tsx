@@ -51,9 +51,7 @@ export default function Footer() {
       </div>
       <div className="border-t px-4 md:px-10 py-5 max-w-[1280px] mx-auto flex justify-between items-center text-xs" style={{ borderColor: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.2)" }}>
         <span>© 2026 Zarika Studio. All rights reserved.</span>
-        <a href="/admin-login" className="hover:opacity-40 transition-opacity" style={{ color: "rgba(255,255,255,0.06)", fontSize: "11px" }}>
-          Staff Login
-        </a>
+        
       </div>
     </footer>
   );
