@@ -139,7 +139,7 @@ export default function AdminPage() {
                       <div style={{fontSize:"11px",color:"#6B7280",fontWeight:500,textTransform:"uppercase",letterSpacing:"0.5px"}}>{m.label}</div>
                       <div style={{background:m.bg,borderRadius:"8px",padding:"6px",fontSize:"18px"}}>{m.icon}</div>
                     </div>
-                    <div style={{fontSize:"26px",fontWeight:700,color:"#111827",fontFamily:"'Cormorant Garamond',serif"}}>{m.value}</div>
+                    <div style={{fontSize:"26px",fontWeight:700,color:"#111827",fontFamily:"'DM Sans',sans-serif"}}>{m.value}</div>
                     <div style={{fontSize:"11px",color:m.color,fontWeight:500}}>{m.sub}</div>
                   </div>
                 ))}
