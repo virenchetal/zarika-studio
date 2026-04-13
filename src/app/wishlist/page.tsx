@@ -7,29 +7,26 @@ import { createClient } from "@/lib/supabase/client";
 export default function WishlistPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mounted, setMounted] = useState(false);
   const supabase = createClient();
 
   useEffect(() => {
-    // Must run client-side only
-    const ids: string[] = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
-    if (ids.length === 0) { setLoading(false); setMounted(true); return; }
-    supabase.from("products")
-      .select("id, name, slug, price, mrp, fabric, color")
-      .in("id", ids)
-      .then(({ data }) => {
-        setItems(data || []);
-        setLoading(false);
-        setMounted(true);
-      });
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) { setLoading(false); return; }
+      const { data } = await supabase
+        .from("wishlists")
+        .select("product_id, products(id, name, slug, price, mrp, fabric, color)")
+        .eq("user_id", user.id);
+      setItems((data || []).map((w: any) => w.products).filter(Boolean));
+      setLoading(false);
+    });
   }, []);
 
-  const removeFromWishlist = (id: string) => {
-    const ids: string[] = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
-    const updated = ids.filter(i => i !== id);
-    localStorage.setItem("zarika-wishlist", JSON.stringify(updated));
+  const removeFromWishlist = async (productId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+    await supabase.from("wishlists").delete().eq("user_id", user.id).eq("product_id", productId);
+    setItems(items.filter(i => i.id !== productId));
     window.dispatchEvent(new Event("zarika-wishlist-update"));
-    setItems(items.filter(i => i.id !== id));
   };
 
   return (
@@ -38,7 +35,9 @@ export default function WishlistPage() {
       <div style={{background:"#FAF8F3",minHeight:"70vh",padding:"3rem 1.5rem"}}>
         <div style={{maxWidth:"1100px",margin:"0 auto"}}>
           <p style={{fontSize:"11px",letterSpacing:"2px",textTransform:"uppercase",color:"#B8973C",marginBottom:"8px"}}>Saved Items</p>
-          <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"40px",fontWeight:400,color:"#2C2420",marginBottom:"2rem"}}>My Wishlist {items.length > 0 && <span style={{fontSize:"20px",color:"#A09890"}}>({items.length})</span>}</h1>
+          <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"40px",fontWeight:400,color:"#2C2420",marginBottom:"2rem"}}>
+            My Wishlist {items.length > 0 && <span style={{fontSize:"20px",color:"#A09890"}}>({items.length})</span>}
+          </h1>
           {loading ? (
             <p style={{color:"#A09890",fontFamily:"'Cormorant Garamond',serif",fontSize:"20px",padding:"4rem",textAlign:"center"}}>Loading your wishlist...</p>
           ) : items.length === 0 ? (
@@ -51,24 +50,21 @@ export default function WishlistPage() {
           ) : (
             <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"1.5rem"}}>
               {items.map(p => {
-                const img = null; // images loaded separately
-                const discount = p.mrp ? Math.round(((p.mrp-p.price)/p.mrp)*100) : null;
+                const discount = p.mrp ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : null;
                 return (
                   <div key={p.id} style={{background:"white",border:"1px solid #EDE6DC",borderRadius:"6px",overflow:"hidden"}}>
-                    <a href={"/product/"+p.slug} style={{display:"block",aspectRatio:"3/4",background:"linear-gradient(145deg,#8B1A35,#C4416A)",textDecoration:"none",overflow:"hidden"}}>
-                      {/* image placeholder until product images are set up */}
-                    </a>
+                    <a href={"/product/" + p.slug} style={{display:"block",aspectRatio:"3/4",background:"linear-gradient(145deg,#8B1A35,#C4416A)",textDecoration:"none",overflow:"hidden"}} />
                     <div style={{padding:"1rem"}}>
                       <p style={{fontSize:"11px",color:"#A09890",textTransform:"uppercase",letterSpacing:"1px",marginBottom:"4px"}}>{p.fabric}</p>
-                      <a href={"/product/"+p.slug} style={{fontSize:"16px",fontWeight:500,color:"#2C2420",textDecoration:"none",display:"block",marginBottom:"8px"}}>{p.name}</a>
+                      <a href={"/product/" + p.slug} style={{fontSize:"16px",fontWeight:500,color:"#2C2420",textDecoration:"none",display:"block",marginBottom:"8px"}}>{p.name}</a>
                       <div style={{display:"flex",alignItems:"center",gap:"8px",marginBottom:"12px"}}>
                         <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"18px",color:"#6B1A2A"}}>₹{p.price.toLocaleString("en-IN")}</span>
                         {p.mrp && <span style={{fontSize:"12px",color:"#A09890",textDecoration:"line-through"}}>₹{p.mrp.toLocaleString("en-IN")}</span>}
                         {discount && <span style={{fontSize:"11px",color:"#2D8A3E",fontWeight:500}}>{discount}% off</span>}
                       </div>
                       <div style={{display:"flex",gap:"8px"}}>
-                        <a href={"/product/"+p.slug} style={{flex:1,background:"#6B1A2A",color:"white",padding:"10px",fontSize:"11px",letterSpacing:"1px",textTransform:"uppercase",textDecoration:"none",borderRadius:"3px",textAlign:"center"}}>View</a>
-                        <button onClick={()=>removeFromWishlist(p.id)} style={{padding:"10px 14px",border:"1px solid #FCA5A5",borderRadius:"3px",background:"none",color:"#DC2626",cursor:"pointer",fontSize:"12px"}}>✕</button>
+                        <a href={"/product/" + p.slug} style={{flex:1,background:"#6B1A2A",color:"white",padding:"10px",fontSize:"11px",letterSpacing:"1px",textTransform:"uppercase",textDecoration:"none",borderRadius:"3px",textAlign:"center"}}>View</a>
+                        <button onClick={() => removeFromWishlist(p.id)} style={{padding:"10px 14px",border:"1px solid #FCA5A5",borderRadius:"3px",background:"none",color:"#DC2626",cursor:"pointer",fontSize:"12px"}}>✕</button>
                       </div>
                     </div>
                   </div>

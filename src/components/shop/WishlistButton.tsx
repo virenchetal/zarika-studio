@@ -1,22 +1,35 @@
 "use client";
 import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
 import toast from "react-hot-toast";
 
 export default function WishlistButton({ productId }: { productId: string }) {
   const [wishlisted, setWishlisted] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
-    const ids: string[] = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
-    setWishlisted(ids.includes(productId));
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) return;
+      setUserId(user.id);
+      supabase.from("wishlists").select("id").eq("user_id", user.id).eq("product_id", productId).single()
+        .then(({ data }) => setWishlisted(!!data));
+    });
   }, [productId]);
 
-  const toggle = () => {
-    const ids: string[] = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
-    const updated = wishlisted ? ids.filter((i: string) => i !== productId) : [...ids, productId];
-    localStorage.setItem("zarika-wishlist", JSON.stringify(updated));
-    window.dispatchEvent(new Event("zarika-wishlist-update"));
-    setWishlisted(!wishlisted);
-    toast(wishlisted ? "Removed from wishlist" : "Saved to wishlist ♡");
+  const toggle = async () => {
+    if (!userId) { toast.error("Please sign in to save items"); return; }
+    if (wishlisted) {
+      await supabase.from("wishlists").delete().eq("user_id", userId).eq("product_id", productId);
+      setWishlisted(false);
+      toast("Removed from wishlist");
+      window.dispatchEvent(new Event("zarika-wishlist-update"));
+    } else {
+      await supabase.from("wishlists").insert({ user_id: userId, product_id: productId });
+      setWishlisted(true);
+      toast("Saved to wishlist ♡");
+      window.dispatchEvent(new Event("zarika-wishlist-update"));
+    }
   };
 
   return (
