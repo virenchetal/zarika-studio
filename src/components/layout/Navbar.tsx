@@ -108,12 +108,7 @@ export default function Navbar() {
       </button>
       <div className="flex items-center gap-3">
             <button onClick={()=>setSearchOpen(!searchOpen)} className="text-dark hover:text-maroon text-lg p-1" aria-label="Search">🔍</button>
-            <a href="/wishlist" className="relative text-dark hover:text-maroon text-lg p-1" aria-label="Wishlist">
-              ♡
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1.5 bg-maroon text-white text-[8px] w-4 h-4 rounded-full flex items-center justify-center font-medium">{wishlistCount}</span>
-              )}
-            </a>
+            
 
             <button onClick={() => setCartOpen(true)}
               className="relative text-dark hover:text-maroon text-lg p-1">
@@ -134,6 +129,7 @@ export default function Navbar() {
                 <div className="absolute right-0 top-full mt-1 bg-white border border-border-light rounded shadow-lg py-1 min-w-[160px] hidden group-hover:block z-50" style={{paddingTop:"8px",marginTop:"-4px"}}>
                   <a href="/profile" className="block px-4 py-2.5 text-sm text-mid hover:bg-cream hover:text-maroon">My Profile</a>
                   <a href="/profile#orders" className="block px-4 py-2.5 text-sm text-mid hover:bg-cream hover:text-maroon">My Orders</a>
+                  <a href="/wishlist" className="block px-4 py-2.5 text-sm text-mid hover:bg-cream hover:text-maroon">My Wishlist {wishlistCount > 0 && <span style={{background:"#6B1A2A",color:"white",fontSize:"10px",padding:"1px 6px",borderRadius:"10px",marginLeft:"4px"}}>{wishlistCount}</span>}</a>
                   <a href="/profile#wishlist" className="block px-4 py-2.5 text-sm text-mid hover:bg-cream hover:text-maroon">Wishlist</a>
                   {profile?.is_admin && (
                     <a href="/admin" className="block px-4 py-2.5 text-sm text-gold font-medium hover:bg-cream">Admin Panel</a>

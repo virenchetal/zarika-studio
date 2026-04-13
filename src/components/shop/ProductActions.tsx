@@ -98,11 +98,6 @@ export default function ProductActions({ product }: { product: Product }) {
         Inquire on WhatsApp
       </button>
 
-      <button onClick={toggleWishlist}
-        style={{width:"100%",padding:"10px",border:`1.5px solid ${wishlisted?"#6B1A2A":"#E4DAD0"}`,borderRadius:"3px",background:wishlisted?"#FFF5F5":"none",cursor:"pointer",fontSize:"12px",color:wishlisted?"#6B1A2A":"#A09890",display:"flex",alignItems:"center",justifyContent:"center",gap:"6px",fontFamily:"'DM Sans',sans-serif"}}>
-        {wishlisted ? "❤️ Saved to Wishlist" : "♡ Save to Wishlist"}
-      </button>
-
       {/* Trust badges */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginTop:"4px"}}>
         {[

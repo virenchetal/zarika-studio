@@ -4,6 +4,7 @@ import { getProductBySlug } from "@/lib/api/products";
 import { notFound } from "next/navigation";
 import ProductImageGallery from "@/components/shop/ProductImageGallery";
 import ProductActions from "@/components/shop/ProductActions";
+import WishlistButton from "@/components/shop/WishlistButton";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 
@@ -25,7 +26,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             <span className="text-light">{product.name}</span>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-20 items-start">
-            <ProductImageGallery images={product.images || []} productName={product.name} />
+            <div style={{position:"relative"}}>
+              <ProductImageGallery images={product.images || []} productName={product.name} />
+              <WishlistButton productId={product.id} />
+            </div>
             <div className="sticky top-20">
               <p className="text-[10px] tracking-[2px] uppercase text-gold mb-2">{product.category?.name}</p>
               <h1 className="font-serif text-4xl font-light text-dark leading-snug mb-5">{product.name}</h1>
