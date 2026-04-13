@@ -48,8 +48,13 @@ export default function AdminPage() {
   };
 
   const updateOrderStatus = async (id: string, status: string) => {
-    await supabase.from("orders").update({ status }).eq("id", id);
-    setOrders(orders.map(o => o.id === id ? { ...o, status } : o));
+    const order = orders.find(o => o.id === id);
+    const updates: any = { status };
+    if (status === "delivered" && order?.payment_method === "cod") {
+      updates.payment_status = "paid";
+    }
+    await supabase.from("orders").update(updates).eq("id", id);
+    setOrders(orders.map(o => o.id === id ? { ...o, ...updates } : o));
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center" style={{background:"#FAF8F3"}}><p className="font-serif text-2xl text-maroon">Loading Admin...</p></div>;
