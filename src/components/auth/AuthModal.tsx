@@ -8,12 +8,30 @@ interface AuthModalProps {
   onClose: () => void;
 }
 
+const EyeIcon = ({ show }: { show: boolean }) => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    {show ? (
+      <>
+        <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+        <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+        <line x1="1" y1="1" x2="23" y2="23"/>
+      </>
+    ) : (
+      <>
+        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </>
+    )}
+  </svg>
+);
+
 export default function AuthModal({ open, onClose }: AuthModalProps) {
   const [tab, setTab] = useState<"signin" | "signup">("signin");
   const [method, setMethod] = useState<"phone" | "email">("phone");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [step, setStep] = useState<"input" | "otp">("input");
@@ -25,9 +43,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
   const sendOTP = async () => {
     if (phone.length < 10) { toast.error("Enter a valid 10-digit number"); return; }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithOtp({
-      phone: `+91${phone}`,
-    });
+    const { error } = await supabase.auth.signInWithOtp({ phone: `+91${phone}` });
     setLoading(false);
     if (error) { toast.error(error.message); return; }
     toast.success("OTP sent successfully!");
@@ -38,20 +54,10 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     const otpStr = otp.join("");
     if (otpStr.length < 6) { toast.error("Enter the complete OTP"); return; }
     setLoading(true);
-    const { error } = await supabase.auth.verifyOtp({
-      phone: `+91${phone}`,
-      token: otpStr,
-      type: "sms",
-    });
+    const { error } = await supabase.auth.verifyOtp({ phone: `+91${phone}`, token: otpStr, type: "sms" });
     setLoading(false);
     if (error) { toast.error("Invalid OTP. Please try again."); return; }
-    if (false) {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from("profiles").upsert({ id: user.id, full_name: name, phone: `+91${phone}` });
-      }
-    }
-    toast.success(`Welcome${name ? ", " + name : ""}!`);
+    toast.success("Welcome!");
     onClose();
     window.location.reload();
   };
@@ -80,9 +86,7 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
     const next = [...otp];
     next[idx] = val;
     setOtp(next);
-    if (val && idx < 5) {
-      document.getElementById(`otp-${idx + 1}`)?.focus();
-    }
+    if (val && idx < 5) document.getElementById(`otp-${idx + 1}`)?.focus();
   };
 
   return (
@@ -90,7 +94,6 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
       <div className="bg-white rounded-lg w-full max-w-md overflow-hidden border-t-4 border-gold">
         <button onClick={onClose} className="absolute right-4 top-4 text-light text-xl leading-none hover:text-dark">✕</button>
 
-        {/* Header */}
         <div className="px-8 pt-8 pb-6 text-center border-b border-border-light">
           <div className="font-serif text-xl font-semibold tracking-[3px] text-maroon uppercase">
             Zarika<span className="text-gold font-light"> Studio</span>
@@ -98,7 +101,6 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
           <p className="text-xs text-light mt-1.5 tracking-wide">Sign in to continue your order</p>
         </div>
 
-        {/* Tabs */}
         <div className="flex border-b border-border-light">
           {(["signin", "signup"] as const).map((t) => (
             <button key={t} onClick={() => { setTab(t); setStep("input"); setOtp(["","","","","",""]); }}
@@ -109,7 +111,6 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
         </div>
 
         <div className="px-8 py-6">
-          {/* Method toggle */}
           {step === "input" && (
             <div className="flex gap-2 mb-5">
               {(["phone", "email"] as const).map((m) => (
@@ -121,7 +122,6 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
             </div>
           )}
 
-          {/* Phone OTP */}
           {method === "phone" && (
             <>
               {step === "input" ? (
@@ -175,7 +175,6 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
             </>
           )}
 
-          {/* Email */}
           {method === "email" && (
             <div className="space-y-4">
               {tab === "signup" && (
@@ -194,9 +193,17 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
               </div>
               <div>
                 <label className="block text-[10px] tracking-widest uppercase text-mid mb-1.5">Password</label>
-                <input value={password} onChange={(e) => setPassword(e.target.value)} type="password"
-                  className="w-full bg-cream border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold"
-                  placeholder="Minimum 6 characters" />
+                <div style={{position:"relative"}}>
+                  <input value={password} onChange={(e) => setPassword(e.target.value)}
+                    type={showPassword ? "text" : "password"}
+                    style={{paddingRight:"44px"}}
+                    className="w-full bg-cream border border-border rounded-sm px-4 py-3 text-sm outline-none focus:border-gold"
+                    placeholder="Minimum 6 characters" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    style={{position:"absolute",right:"12px",top:"50%",transform:"translateY(-50%)",background:"none",border:"none",cursor:"pointer",color:"#A09890",padding:0,display:"flex",alignItems:"center"}}>
+                    <EyeIcon show={showPassword} />
+                  </button>
+                </div>
               </div>
               <button onClick={signInEmail} disabled={loading}
                 className="w-full bg-maroon text-white py-3.5 text-[11px] tracking-widest uppercase rounded-sm hover:bg-maroon-light transition-colors disabled:opacity-60">
@@ -205,7 +212,6 @@ export default function AuthModal({ open, onClose }: AuthModalProps) {
             </div>
           )}
 
-          {/* Google */}
           <div className="flex items-center gap-3 my-5">
             <div className="flex-1 h-px bg-border-light"></div>
             <span className="text-xs text-light">or</span>
