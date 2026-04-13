@@ -8,6 +8,7 @@ export default function AdminPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [section, setSection] = useState("dashboard");
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const supabase = createClient();
@@ -63,6 +64,7 @@ export default function AdminPage() {
 
   return (
     <div style={{minHeight:"100vh",background:"#FAF8F3",display:"flex",flexDirection:"column"}}>
+      {selectedOrder && <OrderDetailModal order={selectedOrder} onClose={()=>setSelectedOrder(null)} />}
       {/* Top bar */}
       <div style={{background:"#1A1614",padding:"12px 2rem",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div style={{display:"flex",alignItems:"center",gap:"16px"}}>
@@ -106,6 +108,17 @@ export default function AdminPage() {
                   </div>
                 ))}
               </div>
+              {products.filter(p=>p.stock_quantity<=5&&p.is_active).length>0&&(
+                <div style={{background:"#FEF3C7",border:"1px solid #F59E0B",borderRadius:"6px",padding:"1rem 1.5rem",marginBottom:"1.5rem"}}>
+                  <p style={{fontSize:"13px",fontWeight:600,color:"#92400E",marginBottom:"8px"}}>⚠️ Low Stock Alert</p>
+                  {products.filter(p=>p.stock_quantity<=5&&p.is_active).map(p=>(
+                    <div key={p.id} style={{display:"flex",justifyContent:"space-between",fontSize:"13px",color:"#92400E",marginBottom:"4px"}}>
+                      <span>{p.name}</span>
+                      <span style={{fontWeight:600}}>{p.stock_quantity} left</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               <div style={{background:"white",border:"1px solid #EDE6DC",borderRadius:"6px",padding:"1.5rem"}}>
                 <h3 style={{fontSize:"14px",fontWeight:500,marginBottom:"1rem",color:"#2C2420"}}>Recent Orders</h3>
                 <table style={{width:"100%",borderCollapse:"collapse",fontSize:"13px"}}>
@@ -150,10 +163,11 @@ export default function AdminPage() {
                         <td style={{padding:"13px 12px",fontWeight:500,color:"#6B1A2A"}}>₹{o.total?.toLocaleString("en-IN")}</td>
                         <td style={{padding:"13px 12px"}}><span style={{fontSize:"11px",color:"#6B635C"}}>{o.payment_method?.toUpperCase()}</span></td>
                         <td style={{padding:"13px 12px"}}><span style={{background:statusColor[o.status]||"#F3F4F6",color:statusText[o.status]||"#374151",padding:"3px 10px",borderRadius:"10px",fontSize:"11px",fontWeight:500}}>{o.status}</span></td>
-                        <td style={{padding:"13px 12px"}}>
+                        <td style={{padding:"13px 12px",display:"flex",gap:"8px",alignItems:"center"}}>
                           <select value={o.status} onChange={e=>updateOrderStatus(o.id,e.target.value)} style={{fontSize:"12px",border:"1px solid #E4DAD0",borderRadius:"3px",padding:"4px 8px",background:"#FAF8F3",cursor:"pointer"}}>
                             {["placed","processing","shipped","delivered","cancelled"].map(s=><option key={s} value={s}>{s}</option>)}
                           </select>
+                          <button onClick={()=>setSelectedOrder(o)} style={{fontSize:"11px",background:"#FAF8F3",border:"1px solid #E4DAD0",borderRadius:"3px",padding:"4px 10px",cursor:"pointer",color:"#6B635C",whiteSpace:"nowrap"}}>View</button>
                         </td>
                       </tr>
                     ))}
@@ -207,6 +221,50 @@ export default function AdminPage() {
 
           {/* CUSTOMERS */}
           {section === "customers" && <CustomerSection supabase={supabase} />}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function OrderDetailModal({ order, onClose }: { order: any, onClose: ()=>void }) {
+  if (!order) return null;
+  return (
+    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.5)",zIndex:1000,display:"flex",alignItems:"center",justifyContent:"center",padding:"1rem"}} onClick={onClose}>
+      <div style={{background:"white",borderRadius:"8px",padding:"2rem",maxWidth:"600px",width:"100%",maxHeight:"85vh",overflow:"auto"}} onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"1.5rem"}}>
+          <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"24px",fontWeight:400,color:"#2C2420"}}>Order #{order.id.slice(0,8).toUpperCase()}</h2>
+          <button onClick={onClose} style={{background:"none",border:"none",fontSize:"20px",cursor:"pointer",color:"#A09890"}}>✕</button>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"1.5rem"}}>
+          {[
+            {label:"Customer",value:order.profile?.full_name||"—"},
+            {label:"Email",value:order.profile?.email||"—"},
+            {label:"Phone",value:order.profile?.phone||"—"},
+            {label:"Payment",value:order.payment_method?.toUpperCase()},
+            {label:"Payment Status",value:order.payment_status},
+            {label:"Order Date",value:new Date(order.created_at).toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"})},
+          ].map(f=>(
+            <div key={f.label} style={{padding:"10px 12px",background:"#FAF8F3",border:"1px solid #EDE6DC",borderRadius:"4px"}}>
+              <div style={{fontSize:"10px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",marginBottom:"3px"}}>{f.label}</div>
+              <div style={{fontSize:"13px",color:"#2C2420",fontWeight:500}}>{f.value}</div>
+            </div>
+          ))}
+        </div>
+        <h3 style={{fontSize:"12px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",marginBottom:"10px"}}>Items Ordered</h3>
+        {(order.items||[]).map((item: any)=>(
+          <div key={item.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid #EDE6DC"}}>
+            <div>
+              <div style={{fontSize:"14px",fontWeight:500,color:"#2C2420"}}>{item.product_name}</div>
+              <div style={{fontSize:"12px",color:"#A09890"}}>Qty: {item.quantity}</div>
+            </div>
+            <div style={{fontSize:"14px",color:"#6B1A2A",fontWeight:500}}>₹{(item.price*item.quantity).toLocaleString("en-IN")}</div>
+          </div>
+        ))}
+        <div style={{marginTop:"1rem",paddingTop:"1rem",borderTop:"2px solid #EDE6DC"}}>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:"13px",color:"#6B635C",marginBottom:"6px"}}><span>Subtotal</span><span>₹{order.subtotal?.toLocaleString("en-IN")}</span></div>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:"13px",color:"#6B635C",marginBottom:"6px"}}><span>Shipping</span><span>{order.shipping===0?"Free":"₹"+order.shipping}</span></div>
+          <div style={{display:"flex",justifyContent:"space-between",fontSize:"16px",fontWeight:600,color:"#2C2420"}}><span>Total</span><span style={{color:"#6B1A2A"}}>₹{order.total?.toLocaleString("en-IN")}</span></div>
         </div>
       </div>
     </div>

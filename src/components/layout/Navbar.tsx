@@ -53,7 +53,7 @@ export default function Navbar() {
               { label: "Home", href: "/" },
               { label: "Shop", href: "/shop" },
               { label: "Collections", href: "/#collections" },
-              { label: "New Arrivals", href: "/#new-arrivals" },
+              { label: "New Arrivals", href: "/shop?sort=newest" },
             ].map((link) => (
               <a key={link.label} href={link.href}
                 className="text-[11px] tracking-widest uppercase text-mid hover:text-maroon transition-colors">

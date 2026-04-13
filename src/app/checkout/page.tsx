@@ -11,7 +11,7 @@ export default function CheckoutPage() {
   const [user, setUser] = useState<any>(null);
   const [addresses, setAddresses] = useState<any[]>([]);
   const [selectedAddress, setSelectedAddress] = useState<string>("");
-  const [paymentMethod, setPaymentMethod] = useState("upi");
+  const [paymentMethod, setPaymentMethod] = useState("cod");
   const [step, setStep] = useState(1);
   const [placing, setPlacing] = useState(false);
   const [showAddAddress, setShowAddAddress] = useState(false);
@@ -23,6 +23,8 @@ export default function CheckoutPage() {
   const grandTotal = subtotal + shipping;
 
   useEffect(() => {
+    // Redirect if cart is empty
+    if (items.length === 0 && step !== 3) { router.push("/shop"); return; }
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { router.push("/"); return; }
       setUser(user);
@@ -35,6 +37,11 @@ export default function CheckoutPage() {
 
   const saveAddress = async () => {
     if (!user) return;
+    if (!newAddress.full_name || !newAddress.phone || !newAddress.line1 || !newAddress.city || !newAddress.state || !newAddress.pincode) {
+      alert("Please fill all required fields"); return;
+    }
+    if (!/^[0-9]{6}$/.test(newAddress.pincode)) { alert("Please enter a valid 6-digit pincode"); return; }
+    if (!/^[0-9]{10}$/.test(newAddress.phone)) { alert("Please enter a valid 10-digit phone number"); return; }
     const { data } = await supabase.from("addresses").insert({ ...newAddress, user_id: user.id, is_default: addresses.length === 0 }).select().single();
     if (data) { setAddresses([...addresses, data]); setSelectedAddress(data.id); setShowAddAddress(false); }
   };
@@ -99,7 +106,7 @@ export default function CheckoutPage() {
                 {showAddAddress ? (
                   <div style={{border:"1px solid #EDE6DC",borderRadius:"5px",padding:"1.25rem",marginTop:"10px"}}>
                     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}}>
-                      {[["Full Name","full_name","text"],["Phone","phone","tel"],["Address Line 1","line1","text"],["Address Line 2 (optional)","line2","text"],["City","city","text"],["State","state","text"],["Pincode","pincode","text"],["Label","label","text"]].map(([label,key,type])=>(
+                      {[["Full Name *","full_name","text"],["Phone * (10 digits)","phone","tel"],["Address Line 1 *","line1","text"],["Address Line 2 (optional)","line2","text"],["City *","city","text"],["State *","state","text"],["Pincode * (6 digits)","pincode","text"],["Label","label","text"]].map(([label,key,type])=>(
                         <div key={key} style={{gridColumn:key==="line1"||key==="label"?"1/-1":"auto"}}>
                           <label style={{display:"block",fontSize:"10px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",marginBottom:"5px"}}>{label}</label>
                           <input type={type} value={(newAddress as any)[key]} onChange={e=>setNewAddress({...newAddress,[key]:e.target.value})}
@@ -115,7 +122,7 @@ export default function CheckoutPage() {
                 ) : (
                   <button onClick={()=>setShowAddAddress(true)} style={{border:"2px dashed #E4DAD0",borderRadius:"5px",padding:"1rem",width:"100%",background:"none",cursor:"pointer",fontSize:"13px",color:"#A09890",marginTop:"10px"}}>+ Add New Address</button>
                 )}
-                <button onClick={()=>{ if(selectedAddress||addresses.length===0) setStep(2); }} style={{width:"100%",background:"#6B1A2A",color:"white",border:"none",padding:"15px",fontSize:"11px",letterSpacing:"2px",textTransform:"uppercase",borderRadius:"3px",cursor:"pointer",marginTop:"1.5rem"}}>Continue to Payment</button>
+                <button onClick={()=>{ if(!selectedAddress && addresses.length > 0) { alert("Please select a delivery address"); return; } if(addresses.length===0) { alert("Please add a delivery address"); return; } setStep(2); }} style={{width:"100%",background:"#6B1A2A",color:"white",border:"none",padding:"15px",fontSize:"11px",letterSpacing:"2px",textTransform:"uppercase",borderRadius:"3px",cursor:"pointer",marginTop:"1.5rem"}}>Continue to Payment</button>
               </div>
             )}
 
@@ -123,8 +130,11 @@ export default function CheckoutPage() {
             {step === 2 && (
               <div style={{background:"white",border:"1px solid #EDE6DC",borderRadius:"5px",padding:"1.5rem"}}>
                 <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"22px",fontWeight:400,color:"#2C2420",marginBottom:"1.25rem"}}>Payment Method</h2>
-                {[["upi","UPI Payment","PhonePe · Google Pay · Paytm · BHIM"],["card","Credit / Debit Card","Visa · Mastercard · Rupay · Powered by Razorpay"],["cod","Cash on Delivery","Pay when your order arrives"]].map(([val,label,sub])=>(
-                  <div key={val} onClick={()=>setPaymentMethod(val)} style={{border:`${paymentMethod===val?"2px solid #B8973C":"1px solid #EDE6DC"}`,borderRadius:"5px",padding:"1rem 1.25rem",marginBottom:"10px",cursor:"pointer",background:paymentMethod===val?"#F5EDD8":"white",display:"flex",alignItems:"center",gap:"14px"}}>
+                <div style={{background:"#FEF9EC",border:"1px solid #B8973C",borderRadius:"5px",padding:"10px 14px",marginBottom:"16px",fontSize:"12px",color:"#6B635C"}}>
+    💳 Online payments (UPI/Card) are coming soon. <strong>Cash on Delivery</strong> is available across India.
+  </div>
+  {[["cod","Cash on Delivery","Pay when your order arrives · Available across India"],["upi","UPI Payment (Coming Soon)","PhonePe · Google Pay · Paytm · BHIM"],["card","Credit / Debit Card (Coming Soon)","Visa · Mastercard · Rupay"]].map(([val,label,sub])=>(
+                  <div key={val} onClick={()=>{ if(val==="upi"||val==="card") return; setPaymentMethod(val); }} style={{border:`${paymentMethod===val?"2px solid #B8973C":"1px solid #EDE6DC"}`,borderRadius:"5px",padding:"1rem 1.25rem",marginBottom:"10px",cursor:val==="cod"?"pointer":"not-allowed",opacity:val==="cod"?1:0.5,background:paymentMethod===val?"#F5EDD8":"white",display:"flex",alignItems:"center",gap:"14px"}}>
                     <div style={{width:"20px",height:"20px",borderRadius:"50%",border:`2px solid ${paymentMethod===val?"#B8973C":"#E4DAD0"}`,background:paymentMethod===val?"#B8973C":"white",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
                       {paymentMethod===val&&<div style={{width:"8px",height:"8px",background:"white",borderRadius:"50%"}}/>}
                     </div>
