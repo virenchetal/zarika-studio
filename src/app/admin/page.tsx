@@ -59,6 +59,16 @@ export default function AdminPage() {
 
   const updateReturnStatus = async (id: string, status: string, adminNote: string) => {
     await supabase.from("return_requests").update({ status, admin_note: adminNote, updated_at: new Date().toISOString() }).eq("id", id);
+    const returnReq = returns.find(r => r.id === id);
+    if (returnReq) {
+      if (status === "approved") {
+        await supabase.from("orders").update({ status: "return_initiated" }).eq("id", returnReq.order_id);
+        setOrders(orders.map(o => o.id === returnReq.order_id ? { ...o, status: "return_initiated" } : o));
+      } else if (status === "refunded") {
+        await supabase.from("orders").update({ status: "refunded" }).eq("id", returnReq.order_id);
+        setOrders(orders.map(o => o.id === returnReq.order_id ? { ...o, status: "refunded" } : o));
+      }
+    }
     setReturns(returns.map(r => r.id === id ? { ...r, status, admin_note: adminNote } : r));
   };
 
@@ -76,8 +86,8 @@ export default function AdminPage() {
   const pendingOrders = orders.filter(o => o.status === "placed").length;
   const processingOrders = orders.filter(o => o.status === "processing").length;
   const shippedOrders = orders.filter(o => o.status === "shipped").length;
-  const statusColor: any = { placed:"#FEF3C7", processing:"#DBEAFE", shipped:"#E0E7FF", delivered:"#D1FAE5", cancelled:"#FEE2E2" };
-  const statusText: any = { placed:"#92400E", processing:"#1E40AF", shipped:"#3730A3", delivered:"#065F46", cancelled:"#991B1B" };
+  const statusColor: any = { placed:"#FEF3C7", processing:"#DBEAFE", shipped:"#E0E7FF", delivered:"#D1FAE5", cancelled:"#FEE2E2", return_initiated:"#F3E8FF", refunded:"#E0E7FF" };
+  const statusText: any = { placed:"#92400E", processing:"#1E40AF", shipped:"#3730A3", delivered:"#065F46", cancelled:"#991B1B", return_initiated:"#6D28D9", refunded:"#3730A3" };
 
   const navItems = [
     { id:"dashboard", label:"Dashboard", icon:"▦", badge: null },
@@ -272,7 +282,7 @@ export default function AdminPage() {
                           <td style={{padding:"12px 14px"}}>
                             <div style={{display:"flex",gap:"6px",alignItems:"center"}}>
                               <select value={o.status} onChange={e=>updateOrderStatus(o.id,e.target.value)} style={{fontSize:"12px",border:"1px solid #E5E7EB",borderRadius:"6px",padding:"4px 6px",background:"white",color:"#374151",cursor:"pointer"}}>
-                                {["placed","processing","shipped","delivered","cancelled"].map(s=><option key={s} value={s}>{s}</option>)}
+                                {["placed","processing","shipped","delivered","cancelled","return_initiated","refunded"].map(s=><option key={s} value={s}>{s.replace("_"," ")}</option>)}
                               </select>
                               <button onClick={()=>setSelectedOrder(o)} style={{background:"#6B1A2A",color:"white",border:"none",borderRadius:"6px",padding:"4px 10px",fontSize:"12px",cursor:"pointer",whiteSpace:"nowrap",fontWeight:500}}>View</button>
                             </div>
