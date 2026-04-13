@@ -107,7 +107,12 @@ export default function Navbar() {
         <div className="w-5 h-0.5 bg-current"></div>
       </button>
       <div className="flex items-center gap-3">
-            <button onClick={()=>setSearchOpen(!searchOpen)} className="text-dark hover:text-maroon text-lg p-1" aria-label="Search">🔍</button>
+            <button onClick={()=>setSearchOpen(!searchOpen)} className="text-dark hover:text-maroon p-1" style={{lineHeight:0}} aria-label="Search">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+            </button>
             
 
             <button onClick={() => setCartOpen(true)}
