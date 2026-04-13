@@ -11,11 +11,17 @@ export default function WishlistPage() {
   const supabase = createClient();
 
   useEffect(() => {
-    setMounted(true);
+    // Must run client-side only
     const ids: string[] = JSON.parse(localStorage.getItem("zarika-wishlist") || "[]");
-    if (ids.length === 0) { setLoading(false); return; }
-    supabase.from("products").select("id, name, slug, price, mrp, fabric, color, images").in("id", ids)
-      .then(({ data }) => { setItems(data || []); setLoading(false); });
+    if (ids.length === 0) { setLoading(false); setMounted(true); return; }
+    supabase.from("products")
+      .select("id, name, slug, price, mrp, fabric, color, images")
+      .in("id", ids)
+      .then(({ data }) => {
+        setItems(data || []);
+        setLoading(false);
+        setMounted(true);
+      });
   }, []);
 
   const removeFromWishlist = (id: string) => {
