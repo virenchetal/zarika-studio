@@ -7,17 +7,17 @@ const footerLinks = {
     { label: "New Arrivals", href: "/#new-arrivals" },
   ],
   Help: [
-    { label: "Shipping Info", href: "#" },
-    { label: "Returns & Exchanges", href: "#" },
-    { label: "Track Your Order", href: "#" },
-    { label: "Care Guide", href: "#" },
-    { label: "Contact Us", href: "#" },
+    { label: "Shipping Info", href: "/shipping" },
+    { label: "Returns & Exchanges", href: "/returns" },
+    { label: "Track Your Order", href: "/profile#orders" },
+    { label: "Care Guide", href: "/shipping" },
+    { label: "Contact Us", href: "/contact" },
   ],
   Company: [
-    { label: "About Us", href: "#" },
-    { label: "Our Weavers", href: "#" },
-    { label: "Terms of Service", href: "#" },
-    { label: "Privacy Policy", href: "#" },
+    { label: "About Us", href: "/about" },
+    { label: "Our Weavers", href: "/about" },
+    { label: "Terms of Service", href: "/terms" },
+    { label: "Privacy Policy", href: "/privacy" },
   ],
 };
 
