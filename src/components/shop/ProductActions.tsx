@@ -3,14 +3,15 @@ import { useCartStore } from "@/lib/store/cart";
 import { Product } from "@/types/database";
 import toast from "react-hot-toast";
 import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ProductActions({ product }: { product: Product }) {
   const addItem = useCartStore((s) => s.addItem);
   const primaryImage = product.images?.find((i: any) => i.is_primary) || product.images?.[0];
   const [viewers, setViewers] = useState(0);
   const [wishlisted, setWishlisted] = useState(false);
-  const supabase = createClient();
   const [userId, setUserId] = useState<string | null>(null);
+  const supabase = createClient();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -20,6 +21,10 @@ export default function ProductActions({ product }: { product: Product }) {
         .then(({ data }) => setWishlisted(!!data));
     });
   }, [product.id]);
+
+  useEffect(() => {
+    setViewers(Math.floor(Math.random() * 10) + 3);
+  }, []);
 
   const toggleWishlist = async () => {
     if (!userId) { toast.error("Please sign in to save items"); return; }
@@ -34,11 +39,6 @@ export default function ProductActions({ product }: { product: Product }) {
     }
     window.dispatchEvent(new Event("zarika-wishlist-update"));
   };
-
-  useEffect(() => {
-    // Realistic social proof — random between 3-12 viewers
-    setViewers(Math.floor(Math.random() * 10) + 3);
-  }, []);
 
   const handleAddToCart = () => {
     if (product.stock_quantity === 0) { toast.error("This item is out of stock"); return; }
@@ -70,8 +70,6 @@ export default function ProductActions({ product }: { product: Product }) {
 
   return (
     <div className="flex flex-col gap-3">
-
-      {/* Social proof + stock urgency */}
       <div style={{display:"flex",flexDirection:"column",gap:"6px",marginBottom:"4px"}}>
         {viewers > 0 && (
           <div style={{display:"flex",alignItems:"center",gap:"8px",fontSize:"12px",color:"#6B635C"}}>
@@ -90,15 +88,17 @@ export default function ProductActions({ product }: { product: Product }) {
         )}
       </div>
 
-      <button onClick={handleBuyNow}
-        disabled={isOutOfStock}
+      <button onClick={handleBuyNow} disabled={isOutOfStock}
         className="w-full bg-maroon text-white py-4 text-[11px] tracking-[2px] uppercase font-medium hover:bg-maroon-light transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
         {isOutOfStock ? "Out of Stock" : "Buy Now"}
       </button>
-      <button onClick={handleAddToCart}
-        disabled={isOutOfStock}
+      <button onClick={handleAddToCart} disabled={isOutOfStock}
         className="w-full border-[1.5px] border-maroon text-maroon py-4 text-[11px] tracking-[2px] uppercase font-medium hover:bg-maroon-pale transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
         Add to Cart
+      </button>
+      <button onClick={toggleWishlist}
+        className="w-full border-[1.5px] border-border text-mid py-3.5 text-[11px] tracking-[1.5px] uppercase font-medium hover:border-maroon hover:text-maroon transition-colors flex items-center justify-center gap-2">
+        {wishlisted ? "❤️ Saved to Wishlist" : "🤍 Save to Wishlist"}
       </button>
       <button onClick={handleWhatsApp}
         className="w-full py-3.5 text-[11px] tracking-[1.5px] uppercase font-medium flex items-center justify-center gap-2 text-white"
@@ -109,7 +109,6 @@ export default function ProductActions({ product }: { product: Product }) {
         Inquire on WhatsApp
       </button>
 
-      {/* Trust badges */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginTop:"4px"}}>
         {[
           {icon:"🚚", text:"Free shipping above ₹2,000"},
@@ -123,8 +122,6 @@ export default function ProductActions({ product }: { product: Product }) {
           </div>
         ))}
       </div>
-
-      {/* Return policy snippet */}
       <div style={{fontSize:"11px",color:"#A09890",textAlign:"center",marginTop:"4px"}}>
         Not happy? <a href="/returns" style={{color:"#B8973C",textDecoration:"underline"}}>Free returns within 7 days</a> of delivery.
       </div>
