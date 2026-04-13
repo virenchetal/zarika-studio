@@ -3,7 +3,7 @@ const footerLinks = {
     { label: "Silk Sarees", href: "/shop?category=silk" },
     { label: "Cotton Sarees", href: "/shop?category=cotton" },
     { label: "Bridal Collection", href: "/shop?category=bridal" },
-    { label: "Festive Edit", href: "/shop?occasion=festive" },
+    { label: "Festive Collection", href: "/shop?occasion=festive" },
     { label: "New Arrivals", href: "/#new-arrivals" },
   ],
   Help: [
