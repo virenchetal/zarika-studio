@@ -2,14 +2,14 @@ const footerLinks = {
   Shop: [
     { label: "Silk Sarees", href: "/shop?category=silk" },
     { label: "Cotton Sarees", href: "/shop?category=cotton" },
-    { label: "Bridal Collection", href: "/shop?category=bridal" },
+    { label: "Bridal Collection", href: "/shop?occasion=bridal" },
     { label: "Festive Collection", href: "/shop?occasion=festive" },
-    { label: "New Arrivals", href: "/#new-arrivals" },
+    { label: "New Arrivals", href: "/shop?sort=newest" },
   ],
   Help: [
     { label: "Shipping Info", href: "/shipping" },
     { label: "Returns & Exchanges", href: "/returns" },
-    { label: "Track Your Order", href: "/profile#orders" },
+    { label: "Track Your Order", href: "/track" },
     { label: "Contact Us", href: "/contact" },
   ],
   Company: [

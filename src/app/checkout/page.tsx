@@ -133,7 +133,7 @@ export default function CheckoutPage() {
               <div style={{background:"white",border:"1px solid #EDE6DC",borderRadius:"5px",padding:"1.5rem"}}>
                 <h2 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"22px",fontWeight:400,color:"#2C2420",marginBottom:"1.25rem"}}>Payment Method</h2>
                 <div style={{background:"#FEF9EC",border:"1px solid #B8973C",borderRadius:"5px",padding:"10px 14px",marginBottom:"16px",fontSize:"12px",color:"#6B635C"}}>
-    💳 Online payments (UPI/Card) are coming soon. <strong>Cash on Delivery</strong> is available across India.
+    💳 Online payments (UPI/Card) are coming soon. <strong>Cash on Delivery</strong> is available across India. For COD returns, our team will contact you for bank details after approval.
   </div>
   {[["cod","Cash on Delivery","Pay when your order arrives · Available across India"],["upi","UPI Payment (Coming Soon)","PhonePe · Google Pay · Paytm · BHIM"],["card","Credit / Debit Card (Coming Soon)","Visa · Mastercard · Rupay"]].map(([val,label,sub])=>(
                   <div key={val} onClick={()=>{ if(val==="upi"||val==="card") return; setPaymentMethod(val); }} style={{border:`${paymentMethod===val?"2px solid #B8973C":"1px solid #EDE6DC"}`,borderRadius:"5px",padding:"1rem 1.25rem",marginBottom:"10px",cursor:val==="cod"?"pointer":"not-allowed",opacity:val==="cod"?1:0.5,background:paymentMethod===val?"#F5EDD8":"white",display:"flex",alignItems:"center",gap:"14px"}}>
