@@ -103,11 +103,7 @@ export default function ProductActions({ product }: { product: Product }) {
         Add to Cart
       </button>
 
-      {/* Tertiary - Wishlist */}
-      <button onClick={toggleWishlist}
-        className="w-full border-[1.5px] border-border text-mid py-3 text-[11px] tracking-[1.5px] uppercase font-medium hover:border-maroon hover:text-maroon transition-colors flex items-center justify-center gap-2">
-        {wishlisted ? "❤️ Saved to Wishlist" : "🤍 Save to Wishlist"}
-      </button>
+
 
       {/* WhatsApp - improved copy */}
       <button onClick={handleWhatsApp}
