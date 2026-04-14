@@ -11,6 +11,7 @@ interface ShopPageProps {
     price?: string;
     occasion?: string;
     sort?: string;
+    search?: string;
   }>;
 }
 
@@ -30,6 +31,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
     sort: params.sort,
     minPrice,
     maxPrice,
+    search: params.search,
   });
 
   return (
@@ -42,9 +44,14 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         </div>
         <div className="flex items-baseline justify-between mb-8">
           <div>
-            <h1 className="font-serif text-4xl font-light text-dark">All Sarees</h1>
-            <p className="text-sm text-light mt-1.5">{products.length} handpicked styles</p>
+            <h1 className="font-serif text-4xl font-light text-dark">
+              {params.search ? `Results for "${params.search}"` : "All Sarees"}
+            </h1>
+            <p className="text-sm text-light mt-1.5">{products.length} {params.search ? "products found" : "handpicked styles"}</p>
           </div>
+          {params.search && (
+            <a href="/shop" className="text-sm text-maroon hover:underline">Clear search ✕</a>
+          )}
         </div>
         <ShopFilters currentFilters={params} />
         <ProductGrid products={products} />
