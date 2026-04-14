@@ -49,6 +49,23 @@ export default async function HomePage() {
 
         <EditorialStrip />
 
+        {/* Craft Story Strip */}
+        <section style={{background:"white",padding:"64px 24px"}}>
+          <div style={{maxWidth:"1280px",margin:"0 auto",display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"48px",textAlign:"center"}}>
+            {[
+              {icon:"🧵",title:"Direct from Weavers",desc:"We travel to Kanchipuram, Varanasi & Pochampally to source directly from the artisans who make them."},
+              {icon:"✋",title:"Handpicked, Every Piece",desc:"Each saree is individually selected for quality, colour fidelity and craftsmanship before it reaches you."},
+              {icon:"📦",title:"Delivered with Care",desc:"Sarees are folded and packed in tissue, boxed carefully so they arrive exactly as they left the weaver's hands."},
+            ].map(item=>(
+              <div key={item.title}>
+                <div style={{fontSize:"32px",marginBottom:"16px"}}>{item.icon}</div>
+                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"20px",color:"#2C2420",marginBottom:"10px",fontWeight:400}}>{item.title}</div>
+                <div style={{fontSize:"13px",color:"#A09890",lineHeight:1.8}}>{item.desc}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
         {/* New Arrivals */}
         <section className="max-w-[1280px] mx-auto px-4 md:px-10 py-24" id="new-arrivals">
           <div className="flex items-end justify-between mb-12">
