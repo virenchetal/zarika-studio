@@ -54,8 +54,8 @@ export default function Hero() {
             </div>
             <div style={{flex:1}}>
               <div style={{fontSize:"10px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",marginBottom:"10px"}}>Delivery</div>
+              <div style={{fontSize:"14px",color:"#2C2420",fontFamily:"'Cormorant Garamond',serif",lineHeight:1.8}}>5–7 business days</div>
               <div style={{fontSize:"14px",color:"#2C2420",fontFamily:"'Cormorant Garamond',serif",lineHeight:1.8}}>Pan India</div>
-              <div style={{fontSize:"14px",color:"#2C2420",fontFamily:"'Cormorant Garamond',serif",lineHeight:1.8}}>COD Available</div>
             </div>
           </div>
         </div>
