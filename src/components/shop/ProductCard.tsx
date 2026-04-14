@@ -44,9 +44,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <Image src={primaryImage.url} alt={product.name} fill className={`object-cover group-hover:scale-105 transition-transform duration-500 ${isOutOfStock ? "opacity-50" : ""}`} />
         ) : (
           <div className={`w-full h-full ${isOutOfStock ? "opacity-50" : ""}`}
-            style={{background:"linear-gradient(160deg, #E8DDD0, #D4C5B8)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"8px"}}>
-            <div style={{fontSize:"32px",opacity:0.25}}>🧣</div>
-            <p style={{fontSize:"9px",letterSpacing:"1.5px",textTransform:"uppercase",color:"#A09890",textAlign:"center",padding:"0 16px",lineHeight:1.8}}>Image<br/>coming soon</p>
+            style={{background:"linear-gradient(160deg,#EDE6DC,#DDD0C4)"}}>
           </div>
         )}
 

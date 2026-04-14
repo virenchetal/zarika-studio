@@ -37,6 +37,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
   return (
     <>
       <Navbar />
+      <div style={{background:"#FAF8F3",minHeight:"80vh"}}>
       <main className="max-w-[1280px] mx-auto px-4 md:px-4 md:px-10 py-8 md:py-12">
         <div className="text-xs text-mid mb-6">
           <a href="/" className="hover:text-maroon cursor-pointer">Home</a>
@@ -56,6 +57,7 @@ export default async function ShopPage({ searchParams }: ShopPageProps) {
         <ShopFilters currentFilters={params} />
         <ProductGrid products={products} />
       </main>
+      </div>
       <Footer />
     </>
   );

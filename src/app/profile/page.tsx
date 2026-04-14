@@ -133,8 +133,8 @@ export default function ProfilePage() {
     setEditingAddress(a); setShowAddressForm(true);
   };
 
-  const statusColor: any = { placed:"#FEF3C7", processing:"#DBEAFE", shipped:"#E0E7FF", delivered:"#D1FAE5", cancelled:"#FEE2E2" };
-  const statusText: any = { placed:"#92400E", processing:"#1E40AF", shipped:"#3730A3", delivered:"#065F46", cancelled:"#991B1B" };
+  const statusColor: any = { placed:"#FEF3C7", processing:"#DBEAFE", shipped:"#E0E7FF", delivered:"#D1FAE5", cancelled:"#FEE2E2", return_initiated:"#F3E8FF", refunded:"#EDE9FE" };
+  const statusText: any = { placed:"#92400E", processing:"#1E40AF", shipped:"#3730A3", delivered:"#065F46", cancelled:"#991B1B", return_initiated:"#6D28D9", refunded:"#4C1D95" };
 
   const navItems = [
     { id:"profile", label:"My Profile", icon:"👤" },
@@ -217,7 +217,7 @@ export default function ProfilePage() {
                         <div style={{fontSize:"12px",color:"#A09890",marginTop:"2px"}}>{new Date(order.created_at).toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"})}</div>
                       </div>
                       <div style={{display:"flex",alignItems:"center",gap:"12px"}}>
-                        <span style={{background:statusColor[order.status]||"#F3F4F6",color:statusText[order.status]||"#374151",padding:"3px 12px",borderRadius:"10px",fontSize:"11px",fontWeight:500}}>{order.status}</span>
+                        <span style={{background:statusColor[order.status]||"#F3F4F6",color:statusText[order.status]||"#374151",padding:"3px 12px",borderRadius:"10px",fontSize:"11px",fontWeight:500}}>{order.status?.charAt(0).toUpperCase()+order.status?.slice(1).replace("_"," ")}</span>
                         <span style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"20px",color:"#6B1A2A",fontWeight:500}}>₹{order.total?.toLocaleString("en-IN")}</span>
                       </div>
                     </div>
