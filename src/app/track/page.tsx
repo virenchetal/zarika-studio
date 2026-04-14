@@ -40,7 +40,9 @@ export default function TrackPage() {
     setNotFound(false);
     setSearchResult(null);
     const cleanId = orderId.trim().replace("#", "").toLowerCase();
-    const { data } = await supabase.from("orders").select("*, items:order_items(*)").ilike("id", `${cleanId}%`).limit(1).single();
+    // Try exact prefix match first, then fetch all and filter client-side
+    const { data: allOrders } = await supabase.from("orders").select("*, items:order_items(*)");
+    const data = (allOrders || []).find(o => o.id.toLowerCase().startsWith(cleanId) || o.id.toLowerCase().replace(/-/g,"").startsWith(cleanId.replace(/-/g,"")));
     setSearching(false);
     if (data) setSearchResult(data);
     else setNotFound(true);
