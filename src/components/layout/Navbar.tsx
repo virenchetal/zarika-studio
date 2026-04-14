@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useCartStore } from "@/lib/store/cart";
+import { useCartSync } from "@/lib/hooks/useCartSync";
 import CartDrawer from "@/components/cart/CartDrawer";
 import AuthModal from "@/components/auth/AuthModal";
 
@@ -28,6 +29,9 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
   const count = useCartStore((s) => s.count());
+  const setSyncFn = useCartStore((s) => s.setSyncFn);
+  const { syncItemToSupabase } = useCartSync();
+  useEffect(() => { setSyncFn(syncItemToSupabase); }, []);
   const supabase = createClient();
 
   useEffect(() => {
