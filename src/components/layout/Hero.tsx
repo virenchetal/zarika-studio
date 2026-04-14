@@ -1,72 +1,64 @@
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden" style={{background:"#FAF8F3",minHeight:"88vh",display:"flex",alignItems:"center"}}>
-      {/* Subtle pattern */}
-      <div className="absolute inset-0" style={{backgroundImage:`url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23B8973C' fill-opacity='0.04'%3E%3Cpath d='M30 0l30 30-30 30L0 30z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,backgroundSize:"60px"}} />
+    <section style={{background:"#FAF8F3",minHeight:"90vh",display:"flex",alignItems:"center",position:"relative",overflow:"hidden"}}>
+      {/* Decorative background text */}
+      <div style={{position:"absolute",right:"-40px",top:"50%",transform:"translateY(-50%)",fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(120px,15vw,200px)",fontWeight:300,color:"rgba(107,26,42,0.04)",lineHeight:1,userSelect:"none",whiteSpace:"nowrap"}}>
+        Zarika
+      </div>
 
-      <div className="max-w-[1280px] mx-auto px-4 md:px-10 w-full relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center py-16 md:py-20">
-
-          {/* Left - Text */}
-          <div>
-            <div className="flex items-center gap-3 mb-8">
-              <div style={{width:"32px",height:"1px",background:"#B8973C"}} />
-              <span style={{fontSize:"10px",letterSpacing:"3px",textTransform:"uppercase",color:"#B8973C"}}>The Finest Sarees, Curated</span>
-            </div>
-            <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(52px,5.5vw,82px)",fontWeight:300,color:"#1A1210",lineHeight:1.05,marginBottom:"24px"}}>
-              Draped in<br />
-              <em style={{color:"#6B1A2A",fontStyle:"italic"}}>Timeless</em><br />
-              Elegance
-            </h1>
-            <p style={{fontSize:"15px",color:"#6B635C",lineHeight:1.9,marginBottom:"40px",maxWidth:"420px",fontWeight:300}}>
-              Handpicked sarees from master weavers across India — from lustrous Kanjivaram silks to breezy summer cottons. Each piece is a story of craft and heritage.
-            </p>
-            <div style={{display:"flex",gap:"12px",flexWrap:"wrap",marginBottom:"48px"}}>
-              <a href="/shop" style={{background:"#6B1A2A",color:"white",padding:"16px 36px",fontSize:"11px",letterSpacing:"2px",textTransform:"uppercase",textDecoration:"none",fontWeight:500,transition:"all 0.2s"}}>
-                Explore Collection
-              </a>
-              <a href="/shop?sort=newest" style={{border:"1px solid #6B1A2A",color:"#6B1A2A",padding:"16px 36px",fontSize:"11px",letterSpacing:"2px",textTransform:"uppercase",textDecoration:"none",transition:"all 0.2s"}}>
-                New Arrivals
-              </a>
-            </div>
-            <div style={{display:"flex",gap:"40px",paddingTop:"32px",borderTop:"1px solid #EDE6DC"}}>
-              {[["500+","Curated Styles"],["48","Master Weavers"],["4.9★","Customer Rating"]].map(([num,label])=>(
-                <div key={label}>
-                  <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"28px",color:"#6B1A2A",fontWeight:400}}>{num}</div>
-                  <div style={{fontSize:"11px",color:"#A09890",letterSpacing:"0.5px",marginTop:"4px"}}>{label}</div>
-                </div>
-              ))}
-            </div>
+      <div style={{maxWidth:"1280px",margin:"0 auto",padding:"80px 40px",width:"100%",position:"relative",zIndex:1}}>
+        <div style={{maxWidth:"760px"}}>
+          {/* Eyebrow */}
+          <div style={{display:"flex",alignItems:"center",gap:"16px",marginBottom:"32px"}}>
+            <div style={{width:"48px",height:"1px",background:"#B8973C"}} />
+            <span style={{fontSize:"10px",letterSpacing:"3px",textTransform:"uppercase",color:"#B8973C",fontWeight:500}}>Handcrafted in India</span>
           </div>
 
-          {/* Right - Editorial image grid */}
-          <div className="hidden md:grid" style={{gridTemplateColumns:"1fr 1fr",gridTemplateRows:"1fr 1fr",gap:"12px",height:"540px"}}>
-            {/* Large left card */}
-            <div style={{gridRow:"1 / 3",borderRadius:"4px",overflow:"hidden",position:"relative",background:"linear-gradient(160deg,#C4416A,#8B1A35)"}}>
-              <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(15,4,8,0.75) 0%,transparent 50%)"}} />
-              <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"24px"}}>
-                <div style={{fontSize:"9px",letterSpacing:"2px",textTransform:"uppercase",color:"#D4AF62",marginBottom:"6px"}}>Bridal</div>
-                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"20px",color:"white",fontWeight:300}}>Kanjivaram Silk</div>
+          {/* Main headline */}
+          <h1 style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"clamp(56px,7vw,96px)",fontWeight:300,color:"#1A1210",lineHeight:1.0,marginBottom:"32px"}}>
+            Sarees that<br/>
+            <span style={{color:"#6B1A2A",fontStyle:"italic"}}>tell a story.</span>
+          </h1>
+
+          {/* Subtext */}
+          <p style={{fontSize:"16px",color:"#6B635C",lineHeight:1.85,marginBottom:"48px",maxWidth:"520px",fontWeight:300}}>
+            Each piece in our collection is handpicked directly from master weavers in Kanchipuram, Varanasi, and Pochampally — where tradition meets artistry.
+          </p>
+
+          {/* CTAs */}
+          <div style={{display:"flex",gap:"16px",flexWrap:"wrap",marginBottom:"64px"}}>
+            <a href="/shop" style={{background:"#6B1A2A",color:"white",padding:"18px 40px",fontSize:"11px",letterSpacing:"2.5px",textTransform:"uppercase",textDecoration:"none",fontWeight:500}}>
+              Shop Collection
+            </a>
+            <a href="/about" style={{color:"#6B1A2A",padding:"18px 40px",fontSize:"11px",letterSpacing:"2.5px",textTransform:"uppercase",textDecoration:"none",borderBottom:"1px solid #6B1A2A",display:"flex",alignItems:"center",gap:"8px"}}>
+              Our Story →
+            </a>
+          </div>
+
+          {/* Stats */}
+          <div style={{display:"flex",gap:"0",paddingTop:"40px",borderTop:"1px solid #EDE6DC"}}>
+            {[
+              ["Kanjivaram","Varanasi","Pochampally","Paithani"],
+              ["Silk · Cotton · Linen · Chanderi"],
+              ["Delivered across India"],
+            ].map((items, i) => (
+              <div key={i} style={{flex:1,paddingRight:"40px",borderRight:i<2?"1px solid #EDE6DC":"none",marginRight:i<2?"40px":"0"}}>
+                {Array.isArray(items) && items.map((item,j) => (
+                  <div key={j} style={{fontSize:"12px",color:j===0?"#2C2420":"#A09890",fontWeight:j===0?500:400,lineHeight:1.8,fontFamily:j===0?"'Cormorant Garamond',serif":"'DM Sans',sans-serif",fontSize:j===0?"14px":"12px"}}>
+                    {item}
+                  </div>
+                ))}
               </div>
-            </div>
-            {/* Top right */}
-            <div style={{borderRadius:"4px",overflow:"hidden",position:"relative",background:"linear-gradient(160deg,#2E6AAD,#1A3D6B)"}}>
-              <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(15,4,8,0.75) 0%,transparent 60%)"}} />
-              <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"16px"}}>
-                <div style={{fontSize:"9px",letterSpacing:"2px",textTransform:"uppercase",color:"#D4AF62",marginBottom:"4px"}}>Party</div>
-                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"16px",color:"white",fontWeight:300}}>Banarasi</div>
-              </div>
-            </div>
-            {/* Bottom right */}
-            <div style={{borderRadius:"4px",overflow:"hidden",position:"relative",background:"linear-gradient(160deg,#3A9650,#1E5C2E)"}}>
-              <div style={{position:"absolute",inset:0,background:"linear-gradient(to top,rgba(15,4,8,0.75) 0%,transparent 60%)"}} />
-              <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"16px"}}>
-                <div style={{fontSize:"9px",letterSpacing:"2px",textTransform:"uppercase",color:"#D4AF62",marginBottom:"4px"}}>Daily</div>
-                <div style={{fontFamily:"'Cormorant Garamond',serif",fontSize:"16px",color:"white",fontWeight:300}}>Cotton Ikkat</div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
+      </div>
+
+      {/* Right side - decorative vertical text */}
+      <div className="hidden md:flex" style={{position:"absolute",right:"60px",top:"50%",transform:"translateY(-50%) rotate(90deg)",transformOrigin:"center",gap:"32px",alignItems:"center"}}>
+        <div style={{width:"40px",height:"1px",background:"#EDE6DC"}} />
+        <span style={{fontSize:"9px",letterSpacing:"4px",textTransform:"uppercase",color:"#C9BDB7",whiteSpace:"nowrap"}}>Est. 2024 · Hyderabad, India</span>
+        <div style={{width:"40px",height:"1px",background:"#EDE6DC"}} />
       </div>
     </section>
   );
