@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import ProductImageUploader from "@/components/admin/ProductImageUploader";
 import { useRouter } from "next/navigation";
 
 const INPUT = { width:"100%", padding:"10px 12px", border:"1px solid #E4DAD0", borderRadius:"4px", fontSize:"13px", background:"#FAF8F3", fontFamily:"'DM Sans',sans-serif", color:"#2C2420", boxSizing:"border-box" as const };
@@ -12,6 +13,7 @@ export default function AddProductPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<any[]>([]);
   const [saving, setSaving] = useState(false);
+  const [newProductId, setNewProductId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [form, setForm] = useState({
@@ -59,11 +61,11 @@ export default function AddProductPage() {
       is_active: form.is_active, is_featured: form.is_featured,
       badge: form.badge || null, delivery_days: form.delivery_days || null,
     };
-    const { error: err } = await supabase.from("products").insert(payload);
+    const { data: newProduct, error: err } = await supabase.from("products").insert(payload).select().single();
     setSaving(false);
     if (err) { setError("Error: " + err.message); return; }
-    setSuccess("Product added successfully!");
-    setTimeout(() => router.push("/admin"), 1500);
+    setNewProductId(newProduct.id);
+    setSuccess("Product created! Now add images below, then click Finish.");
   };
 
   return (
@@ -187,12 +189,27 @@ export default function AddProductPage() {
           </div>
         </div>
 
+        {/* Images - shown after product is created */}
+        {newProductId && (
+          <div style={{background:"white",border:"1px solid #EDE6DC",borderRadius:"6px",padding:"1.5rem",marginBottom:"1.5rem"}}>
+            <h3 style={{fontSize:"13px",fontWeight:600,color:"#2C2420",marginBottom:"0.5rem",textTransform:"uppercase",letterSpacing:"1px"}}>Product Images</h3>
+            <p style={{fontSize:"12px",color:"#A09890",marginBottom:"1rem"}}>Upload multiple images. The first image will be shown as primary.</p>
+            <ProductImageUploader productId={newProductId} />
+          </div>
+        )}
+
         {/* Actions */}
         <div style={{display:"flex",gap:"12px",justifyContent:"flex-end"}}>
           <a href="/admin" style={{padding:"12px 24px",border:"1px solid #E4DAD0",borderRadius:"4px",fontSize:"12px",color:"#6B635C",textDecoration:"none",letterSpacing:"1px",textTransform:"uppercase"}}>Cancel</a>
-          <button onClick={handleSubmit} disabled={saving} style={{background:saving?"#A09890":"#6B1A2A",color:"white",padding:"12px 32px",borderRadius:"4px",fontSize:"12px",letterSpacing:"1px",textTransform:"uppercase",border:"none",cursor:saving?"not-allowed":"pointer",fontFamily:"'DM Sans',sans-serif"}}>
-            {saving ? "Saving..." : "Add Product"}
-          </button>
+          {!newProductId ? (
+            <button onClick={handleSubmit} disabled={saving} style={{background:saving?"#A09890":"#6B1A2A",color:"white",padding:"12px 32px",borderRadius:"4px",fontSize:"12px",letterSpacing:"1px",textTransform:"uppercase",border:"none",cursor:saving?"not-allowed":"pointer",fontFamily:"'DM Sans',sans-serif"}}>
+              {saving ? "Saving..." : "Add Product"}
+            </button>
+          ) : (
+            <button onClick={() => router.push("/admin")} style={{background:"#6B1A2A",color:"white",padding:"12px 32px",borderRadius:"4px",fontSize:"12px",letterSpacing:"1px",textTransform:"uppercase",border:"none",cursor:"pointer",fontFamily:"'DM Sans',sans-serif"}}>
+              Finish →
+            </button>
+          )}
         </div>
       </div>
     </div>

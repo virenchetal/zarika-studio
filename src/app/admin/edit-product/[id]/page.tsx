@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import ProductImageUploader from "@/components/admin/ProductImageUploader";
 import { useRouter, useParams } from "next/navigation";
 
 const INPUT = { width:"100%", padding:"10px 12px", border:"1px solid #E4DAD0", borderRadius:"4px", fontSize:"13px", background:"#FAF8F3", fontFamily:"'DM Sans',sans-serif", color:"#2C2420", boxSizing:"border-box" as const };
@@ -189,6 +190,13 @@ export default function EditProductPage() {
             <div><label style={LABEL}>SKU</label><input style={INPUT} value={form.sku} onChange={e=>set("sku",e.target.value)} /></div>
             <div><label style={LABEL}>Delivery Days</label><input style={INPUT} value={form.delivery_days} onChange={e=>set("delivery_days",e.target.value)} placeholder="5-7" /></div>
           </div>
+        </div>
+
+        {/* Product Images */}
+        <div style={{background:"white",border:"1px solid #EDE6DC",borderRadius:"6px",padding:"1.5rem",marginBottom:"1.5rem"}}>
+          <h3 style={{fontSize:"13px",fontWeight:600,color:"#2C2420",marginBottom:"0.5rem",textTransform:"uppercase",letterSpacing:"1px"}}>Product Images</h3>
+          <p style={{fontSize:"12px",color:"#A09890",marginBottom:"1rem"}}>Upload, reorder or delete images. Click "Set Primary" to choose the main image.</p>
+          <ProductImageUploader productId={id} />
         </div>
 
         <div style={{display:"flex",gap:"12px",justifyContent:"flex-end"}}>
